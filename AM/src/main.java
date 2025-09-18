@@ -5,9 +5,93 @@
 
 
 //////////KATHIA///////////////////////////////////////////
-
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.filechooser.FileSystemView;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import java.io.File;
+import java.util.Random;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.RowFilter;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import javax.swing.UIManager;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 //////////////////////////////////////KATHIA/////////////////////////////////////////////////////////
+public class main extends javax.swing.JFrame {
+    private DefaultTableModel modelo;
+    private JTable miTablaProcesos;
 
+    public main() {
+        initComponents();
+        getContentPane().setBackground(Color.WHITE);
+        this.setLocationRelativeTo(null);
+        No_procesos.setEditable(false);
+        configurarTabla();
+        mostrar_procesos();
+    }
+
+    private void configurarTabla() {
+        modelo = new DefaultTableModel(new Object[][]{},
+            new String[]{"Aplicaciones", "Nombre", "PID", "Tipo de sesión", "Número de sesión", "memoria"}) {
+            Class[] types = new Class[]{
+                ImageIcon.class, String.class, String.class, String.class, String.class, String.class
+            };
+            boolean[] canEdit = new boolean[]{
+                false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit[columnIndex];
+            }
+
+            public Class<?> getColumnClass(int columnIndex) {
+                return types[columnIndex];
+            }
+        };
+
+        jtabla_datos.setModel(modelo);
+
+        DefaultTableCellRenderer Alinear = new DefaultTableCellRenderer();
+        Alinear.setHorizontalAlignment(SwingConstants.RIGHT);
+        for (int col = 2; col <= 5; col++) {
+            jtabla_datos.getColumnModel().getColumn(col).setCellRenderer(Alinear);
+        }
+    }
 ////////////////////////////////////////PABLO///////////////////////////////////////////////////////////////////
     
 /////////////////////////////MISHEL/////////////////////////////////////////////////
@@ -17,7 +101,20 @@
 ////////////////////////////////PABLO//////////////////////////////////////////////////////////////
  
 ///////////////////////////KATHIA/////////////////////////////////////////////////////////
- 
+public void Matar_proceso() {
+        int fila = jtabla_datos.getSelectedRow();
+        if (fila == -1) {
+            JOptionPane.showMessageDialog(this, "ERROR, No se ha seleccionado ningún proceso", "Error", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        String pid = String.valueOf(modelo.getValueAt(fila, 2));
+        try {
+            Process hijo = Runtime.getRuntime().exec("taskkill /F /PID " + pid);
+            hijo.waitFor();
+        } catch (IOException | InterruptedException ex) {
+            Logger.getLogger(main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -279,7 +376,9 @@
 
     private void jterminar_procesosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jterminar_procesosActionPerformed
 //////KATHIA//////////
-       
+        Matar_proceso();//llama al procedimiento de terminar un proceso
+        LimpiarTabla();//limpia la tabla antes de colocar los procesos despues de haber terminado uno
+        mostrar_procesos();//coloca de nuevo los procesos que quedaron sin los que se acaban de terminar
     }//GEN-LAST:event_jterminar_procesosActionPerformed
 
     private void No_procesosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_No_procesosActionPerformed
