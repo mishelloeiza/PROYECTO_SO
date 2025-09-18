@@ -97,7 +97,33 @@ public class main extends javax.swing.JFrame {
 /////////////////////////////MISHEL/////////////////////////////////////////////////
  
 //////////////////////////////////ALISSON//////////////////////////////////////////////////////////////////////////////
-
+public static Map<String, Double> obtenerProcesosDesdeWindows() {
+        Map<String, Double> procesos = new LinkedHashMap<>();
+        try {
+            Process proceso = Runtime.getRuntime().exec(new String[]{"cmd", "/c", "tasklist /FO CSV /NH"});
+            BufferedReader reader = new BufferedReader(new InputStreamReader(proceso.getInputStream(), "Cp1252"));
+            String linea;
+            while ((linea = reader.readLine()) != null) {
+                String[] partes = linea.split("\",\"");
+                if (partes.length >= 5) {
+                    String nombre = partes[0].replace("\"", "").trim();
+                    String memoriaStr = partes[4].replace("\"", "").replace("K", "").replace(",", "").trim();
+                    if (!memoriaStr.isEmpty()) {
+                        try {
+                            double memoriaKB = Double.parseDouble(memoriaStr);
+                            double memoriaMB = memoriaKB / 1024;
+                            if (memoriaMB > 0) {
+                                procesos.put(nombre, memoriaMB);
+                            }
+                        } catch (NumberFormatException ignored) {}
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return procesos;
+    }
 ////////////////////////////////PABLO//////////////////////////////////////////////////////////////
  
 ///////////////////////////KATHIA/////////////////////////////////////////////////////////
@@ -387,6 +413,138 @@ public void Matar_proceso() {
 
     private void GRAFICActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GRAFICActionPerformed
 ///////////ALISSON//////////
+    JFrame ventana = new JFrame("Dashboard de Procesos");
+    ventana.setSize(900, 600);
+    ventana.setLocationRelativeTo(null);
+    ventana.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+    JPanel panelGrafica = new JPanel() {
+        Map<String, Double> procesos = obtenerProcesosDesdeWindows();
+        Map<String, Integer> alturasAnimadas = new LinkedHashMap<>();
+        Random rand = new Random();
+
+        Color[] colores = {
+            new Color(0x3B82F6), new Color(0x10B981), new Color(0xF59E0B),
+            new Color(0x8B5CF6), new Color(0xEF4444), new Color(0x06B6D4),
+            new Color(0x22C55E), new Color(0x6366F1), new Color(0xEAB308),
+            new Color(0xEC4899)
+        };
+
+        {
+            if (procesos.isEmpty()) {
+                procesos.put("operaApp.exe", 320.0);
+                procesos.put("FChrome.exe", 210.0);
+                procesos.put("TestJava.exe", 180.0);
+                procesos.put("DummyExplorer.exe", 95.0);
+                procesos.put("Service.exe", 60.0);
+            }
+
+            for (String nombre : procesos.keySet()) {
+                alturasAnimadas.put(nombre, rand.nextInt(100));
+            }
+
+            new Timer(500, e -> {
+                double usoCPU = obtenerUsoCPU();
+                for (String nombre : alturasAnimadas.keySet()) {
+                    int actual = alturasAnimadas.get(nombre);
+                    int nuevo = (int) (usoCPU * 150 + rand.nextInt(30));
+                    int interpolado = actual + (nuevo - actual) / 2;
+                    alturasAnimadas.put(nombre, interpolado);
+                }
+                repaint();
+            }).start();
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+            List<Map.Entry<String, Double>> top = procesos.entrySet().stream()
+                    .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
+                    .limit(10).toList();
+
+            double total = top.stream().mapToDouble(Map.Entry::getValue).sum();
+
+            // Título
+            g2.setColor(Color.DARK_GRAY);
+            g2.setFont(new Font("Segoe UI", Font.BOLD, 18));
+            g2.drawString("Distribución de Memoria por Proceso", 300, 40);
+
+            // Donut chart
+            int x = 100, y = 80, w = 280, h = 280;
+            double inicio = 0;
+            int i = 0;
+
+            for (Map.Entry<String, Double> entry : top) {
+                double porcentaje = entry.getValue() / total;
+                double angulo = porcentaje * 360;
+
+                g2.setColor(colores[i % colores.length]);
+                g2.fillArc(x, y, w, h, (int) inicio, (int) angulo);
+                inicio += angulo;
+                i++;
+            }
+
+            // Donut centro blanco
+            g2.setColor(Color.WHITE);
+            g2.fillOval(x + 60, y + 60, w - 120, h - 120);
+
+            // Leyenda
+            int leyendaY = 100;
+            i = 0;
+            for (Map.Entry<String, Double> entry : top) {
+                g2.setColor(colores[i % colores.length]);
+                g2.fillRoundRect(420, leyendaY, 15, 15, 4, 4);
+                g2.setColor(Color.BLACK);
+                g2.drawString(entry.getKey() + String.format(" (%.1f MB)", entry.getValue()), 445, leyendaY + 12);
+                leyendaY += 22;
+                i++;
+            }
+
+            // Barras animadas con gradiente
+            int barraX = 100;
+            int baseY = 420;
+            int anchoBarra = 24;
+            int espacio = 35;
+            i = 0;
+
+            for (Map.Entry<String, Double> entry : top) {
+                int altura = alturasAnimadas.get(entry.getKey());
+                int xBarra = barraX + i * espacio;
+
+                GradientPaint grad = new GradientPaint(xBarra, baseY - altura, colores[i % colores.length],
+                                                       xBarra, baseY, colores[i % colores.length].darker());
+                g2.setPaint(grad);
+                g2.fillRoundRect(xBarra, baseY - altura, anchoBarra, altura, 6, 6);
+
+                g2.setColor(Color.BLACK);
+                g2.drawRoundRect(xBarra, baseY - altura, anchoBarra, altura, 6, 6);
+                g2.drawString(String.format("%.1f MB", entry.getValue()), xBarra - 10, baseY - altura - 5);
+                i++;
+            }
+
+            // CPU info
+            g2.setColor(Color.DARK_GRAY);
+            g2.drawString("Actividad de procesos (CPU)", 100, baseY + 30);
+            g2.drawString(String.format("CPU: %.1f%%", obtenerUsoCPU() * 100), 100, baseY + 50);
+        }
+
+        private double obtenerUsoCPU() {
+            try {
+                com.sun.management.OperatingSystemMXBean osBean =
+                    (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+                return osBean.getSystemCpuLoad();
+            } catch (Exception e) {
+                return 0.5;
+            }
+        }
+    };
+
+    ventana.add(panelGrafica);
+    ventana.setVisible(true);
     
     }//GEN-LAST:event_GRAFICActionPerformed
 
@@ -410,6 +568,72 @@ public void Matar_proceso() {
 
     private void VistaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VistaActionPerformed
 //////////////////////ALISSON///////////////////////////////////////////
+    JPopupMenu menuVista = new JPopupMenu();
+
+    JMenuItem agruparTipo = new JMenuItem("Agrupar por tipo");
+    JMenuItem vistaCompacta = new JMenuItem("Vista compacta");
+    JMenuItem contraerTodo = new JMenuItem("Ocultar procesos en segundo plano");
+    JMenuItem restaurarVista = new JMenuItem("Restaurar vista completa");
+
+    JTable tabla = this.jtabla_datos; // 
+    DefaultTableModel modelo = (DefaultTableModel) tabla.getModel();
+
+    // Agrupar por tipo (ordenar por columna 0: nombre)
+    agruparTipo.addActionListener(e -> {
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(modelo);
+        sorter.setSortKeys(List.of(new RowSorter.SortKey(0, SortOrder.ASCENDING)));
+        tabla.setRowSorter(sorter);
+        JOptionPane.showMessageDialog(null, "Procesos agrupados por tipo.");
+    });
+
+    // Vista compacta (oculta columnas excepto "Nombre" y "Memoria")
+    vistaCompacta.addActionListener(e -> {
+        TableColumnModel columnas = tabla.getColumnModel();
+        for (int i = 0; i < columnas.getColumnCount(); i++) {
+            String nombre = columnas.getColumn(i).getHeaderValue().toString();
+            if (!nombre.equalsIgnoreCase("Nombre") && !nombre.equalsIgnoreCase("Memoria")) {
+                columnas.getColumn(i).setMinWidth(0);
+                columnas.getColumn(i).setMaxWidth(0);
+                columnas.getColumn(i).setWidth(0);
+            }
+        }
+        JOptionPane.showMessageDialog(null, "Vista compacta activada.");
+    });
+
+    // Ocultar procesos en segundo plano (filtrar por tipo)
+    contraerTodo.addActionListener(e -> {
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(modelo);
+        sorter.setRowFilter(new RowFilter<TableModel, Integer>() {
+            @Override
+            public boolean include(RowFilter.Entry<? extends TableModel, ? extends Integer> entry) {
+                String tipo = entry.getStringValue(1); // columna 1: tipo de proceso
+                return tipo.equalsIgnoreCase("Aplicación");
+            }
+        });
+        tabla.setRowSorter(sorter);
+        JOptionPane.showMessageDialog(null, "Procesos en segundo plano ocultos.");
+    });
+
+    // Restaurar vista completa (quitar filtros y mostrar todas las columnas)
+    restaurarVista.addActionListener(e -> {
+        tabla.setRowSorter(null); // quita filtros
+
+        TableColumnModel columnas = tabla.getColumnModel();
+        for (int i = 0; i < columnas.getColumnCount(); i++) {
+            columnas.getColumn(i).setMinWidth(15);
+            columnas.getColumn(i).setMaxWidth(500);
+            columnas.getColumn(i).setWidth(100);
+        }
+        JOptionPane.showMessageDialog(null, "Vista restaurada.");
+    });
+
+    menuVista.add(agruparTipo);
+    menuVista.add(vistaCompacta);
+    menuVista.add(contraerTodo);
+    menuVista.add(restaurarVista);
+
+    Component fuente = (Component) evt.getSource();
+    menuVista.show(fuente, 0, fuente.getHeight());
 
     }//GEN-LAST:event_VistaActionPerformed
 
