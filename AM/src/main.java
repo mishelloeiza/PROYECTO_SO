@@ -93,7 +93,35 @@ public class main extends javax.swing.JFrame {
         }
     }
 ////////////////////////////////////////PABLO///////////////////////////////////////////////////////////////////
-    
+    private void mostrar_procesos() {
+        modelo.setRowCount(0);
+
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"cmd", "/c", "tasklist /FO CSV /NH"});
+            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream(), "Cp1252"));
+            String line;
+            while ((line = input.readLine()) != null) {
+                String[] parts = line.split("\",\"");
+                if (parts.length >= 5) {
+                    String nombreExe = parts[0].replace("\"", "").trim();
+                    String pid = parts[1].replace("\"", "").trim();
+                    String tipoSesion = parts[2].replace("\"", "").trim();
+                    String numSesion = parts[3].replace("\"", "").trim();
+                    String memoria = parts[4].replace("\"", "").trim();
+
+                    Object[] fila = new Object[]{
+                        obtenerIconoDeExe(nombreExe),
+                        nombreExe, pid, tipoSesion, numSesion, memoria
+                    };
+                    modelo.addRow(fila);
+                }
+            }
+            input.close();
+            No_procesos.setText(String.valueOf(modelo.getRowCount()));
+        } catch (Exception err) {
+            err.printStackTrace();
+        }
+    }
 /////////////////////////////MISHEL/////////////////////////////////////////////////
  
 //////////////////////////////////ALISSON//////////////////////////////////////////////////////////////////////////////
@@ -125,7 +153,9 @@ public static Map<String, Double> obtenerProcesosDesdeWindows() {
         return procesos;
     }
 ////////////////////////////////PABLO//////////////////////////////////////////////////////////////
- 
+    void LimpiarTabla() {
+        modelo.setRowCount(0);
+    }
 ///////////////////////////KATHIA/////////////////////////////////////////////////////////
 public void Matar_proceso() {
         int fila = jtabla_datos.getSelectedRow();
@@ -397,7 +427,9 @@ public void Matar_proceso() {
 
     private void jIniciar_procesosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jIniciar_procesosActionPerformed
 //////PABLO/////
-      
+        LimpiarTabla();//limpia la tabla antes de insertr todos los procesos
+        mostrar_procesos();//llama al procedimiento de mostrar procesos y los coloca en la tabla
+
     }//GEN-LAST:event_jIniciar_procesosActionPerformed
 
     private void jterminar_procesosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jterminar_procesosActionPerformed
