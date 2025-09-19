@@ -5,6 +5,10 @@
 
 
 //////////KATHIA///////////////////////////////////////////
+import java.util.ArrayList;
+import java.util.List;
+
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -123,6 +127,57 @@ public class main extends javax.swing.JFrame {
         }
     }
 /////////////////////////////MISHEL/////////////////////////////////////////////////
+    public static ImageIcon obtenerIconoDeExe(String nombreProceso) {
+    try {
+        File f = new File("C:\\Windows\\System32\\" + nombreProceso);
+        if (f.exists()) {
+            javax.swing.Icon icon = FileSystemView.getFileSystemView().getSystemIcon(f);
+            return escalarIcono(icon, 16, 16);
+        }
+    } catch (Exception e) {
+        // ignorar
+    }
+
+// Ícono genérico: logo de Windows clásico sin fondo
+int size = 16;
+BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+Graphics2D g2 = img.createGraphics();
+g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+// No se dibuja fondo: transparencia
+
+// Tamaño de cada panel
+int gap = 1;
+int w = (size - gap * 3) / 2;
+int h = (size - gap * 3) / 2;
+
+// Panel superior izquierdo (rojo)
+g2.setColor(new Color(198, 0, 0));
+g2.fillRect(gap, gap, w, h);
+
+// Panel superior derecho (verde)
+g2.setColor(new Color(0, 128, 0));
+g2.fillRect(gap * 2 + w, gap, w, h);
+
+// Panel inferior izquierdo (azul)
+g2.setColor(new Color(0, 102, 204));
+g2.fillRect(gap, gap * 2 + h, w, h);
+
+// Panel inferior derecho (amarillo)
+g2.setColor(new Color(255, 204, 0));
+g2.fillRect(gap * 2 + w, gap * 2 + h, w, h);
+
+g2.dispose();
+return new ImageIcon(img);
+}
+// Método auxiliar para escalar íconos de Windows
+private static ImageIcon escalarIcono(javax.swing.Icon icon, int w, int h) {
+    BufferedImage img = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+    Graphics g = img.createGraphics();
+    icon.paintIcon(null, g, 0, 0);
+    g.dispose();
+    return new ImageIcon(img.getScaledInstance(w, h, Image.SCALE_SMOOTH));
+}
  
 //////////////////////////////////ALISSON//////////////////////////////////////////////////////////////////////////////
 public static Map<String, Double> obtenerProcesosDesdeWindows() {
@@ -444,9 +499,9 @@ public void Matar_proceso() {
     }//GEN-LAST:event_No_procesosActionPerformed
 
     private void GRAFICActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GRAFICActionPerformed
-///////////ALISSON//////////
+//MISHEL
     JFrame ventana = new JFrame("Dashboard de Procesos");
-    ventana.setSize(900, 600);
+    ventana.setSize(950, 650);
     ventana.setLocationRelativeTo(null);
     ventana.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -455,34 +510,82 @@ public void Matar_proceso() {
         Map<String, Integer> alturasAnimadas = new LinkedHashMap<>();
         Random rand = new Random();
 
+        double ramTotal = 8.0;
+        double discoTotal = 512.0;
+        double redMax = 100.0;
+
+        // Valores actuales
+        double ramUsada = 3.5;
+        double discoUsado = 120.0;
+        double redRx = 0.0;
+        double redTx = 0.0;
+
+        // Valores objetivo (para interpolación)
+        double objetivoRam = ramUsada;
+        double objetivoDisco = discoUsado;
+        double objetivoRedRx = redRx;
+        double objetivoRedTx = redTx;
+
         Color[] colores = {
-            new Color(0x3B82F6), new Color(0x10B981), new Color(0xF59E0B),
-            new Color(0x8B5CF6), new Color(0xEF4444), new Color(0x06B6D4),
-            new Color(0x22C55E), new Color(0x6366F1), new Color(0xEAB308),
-            new Color(0xEC4899)
+            new Color(0x1F2937), new Color(0x374151), new Color(0x4B5563),
+            new Color(0x2563EB), new Color(0x059669), new Color(0xD97706),
+            new Color(0x6B7280), new Color(0x0EA5E9), new Color(0x7C3AED),
+            new Color(0xDC2626)
         };
 
         {
-            if (procesos.isEmpty()) {
-                procesos.put("operaApp.exe", 320.0);
-                procesos.put("FChrome.exe", 210.0);
-                procesos.put("TestJava.exe", 180.0);
-                procesos.put("DummyExplorer.exe", 95.0);
-                procesos.put("Service.exe", 60.0);
-            }
-
             for (String nombre : procesos.keySet()) {
                 alturasAnimadas.put(nombre, rand.nextInt(100));
             }
 
             new Timer(500, e -> {
                 double usoCPU = obtenerUsoCPU();
+
+                //  nuevos procesos
+                if (rand.nextDouble() < 0.3 && procesos.size() < 15) {
+                    String nuevoProceso = "Proceso" + rand.nextInt(1000) + ".exe";
+                    double memoria = 50 + rand.nextDouble() * 300;
+                    procesos.put(nuevoProceso, memoria);
+                    alturasAnimadas.put(nuevoProceso, rand.nextInt(100));
+                }
+
+                //  cierre de procesos
+                if (rand.nextDouble() < 0.2 && procesos.size() > 5) {
+                    java.util.List<String> claves = new java.util.ArrayList<>();
+                    for (String clave : procesos.keySet()) {
+                        claves.add(clave);
+                    }
+                    String eliminar = claves.get(rand.nextInt(claves.size()));
+                    procesos.remove(eliminar);
+                    alturasAnimadas.remove(eliminar);
+                }
+
+                // Actualizar memoria  por proceso
+                for (String nombre : procesos.keySet()) {
+                    double nuevaMemoria = 50 + rand.nextDouble() * 300;
+                    procesos.put(nombre, nuevaMemoria);
+                }
+
+                // Nuevos objetivos para RAM, disco y red
+                objetivoRam = 2.5 + rand.nextDouble() * 5.0;
+                objetivoDisco = 100 + rand.nextDouble() * 300;
+                objetivoRedRx = rand.nextDouble() * redMax;
+                objetivoRedTx = rand.nextDouble() * redMax;
+
+                // Interpolación suave
+                ramUsada += (objetivoRam - ramUsada) * 0.3;
+                discoUsado += (objetivoDisco - discoUsado) * 0.3;
+                redRx += (objetivoRedRx - redRx) * 0.3;
+                redTx += (objetivoRedTx - redTx) * 0.3;
+
+                // Actualizar animación de barras
                 for (String nombre : alturasAnimadas.keySet()) {
                     int actual = alturasAnimadas.get(nombre);
                     int nuevo = (int) (usoCPU * 150 + rand.nextInt(30));
                     int interpolado = actual + (nuevo - actual) / 2;
                     alturasAnimadas.put(nombre, interpolado);
                 }
+
                 repaint();
             }).start();
         }
@@ -494,55 +597,58 @@ public void Matar_proceso() {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
+            // Fondo cuadriculado
+            g2.setColor(new Color(230, 230, 230));
+            for (int gx = 0; gx < getWidth(); gx += 40) g2.drawLine(gx, 0, gx, getHeight());
+            for (int gy = 0; gy < getHeight(); gy += 40) g2.drawLine(0, gy, getWidth(), gy);
+
+            // Top 8 procesos por memoria
             List<Map.Entry<String, Double>> top = procesos.entrySet().stream()
                     .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
-                    .limit(10).toList();
+                    .limit(8).toList();
 
             double total = top.stream().mapToDouble(Map.Entry::getValue).sum();
 
-            // Título
             g2.setColor(Color.DARK_GRAY);
             g2.setFont(new Font("Segoe UI", Font.BOLD, 18));
-            g2.drawString("Distribución de Memoria por Proceso", 300, 40);
+            g2.drawString("Distribución de Memoria por Proceso", 280, 40);
 
-            // Donut chart
+            // Gráfico circular (donut)
             int x = 100, y = 80, w = 280, h = 280;
             double inicio = 0;
             int i = 0;
-
             for (Map.Entry<String, Double> entry : top) {
                 double porcentaje = entry.getValue() / total;
                 double angulo = porcentaje * 360;
-
                 g2.setColor(colores[i % colores.length]);
                 g2.fillArc(x, y, w, h, (int) inicio, (int) angulo);
                 inicio += angulo;
                 i++;
             }
-
-            // Donut centro blanco
             g2.setColor(Color.WHITE);
             g2.fillOval(x + 60, y + 60, w - 120, h - 120);
 
-            // Leyenda
-            int leyendaY = 100;
+            // Leyenda (columna derecha)
+            int leyendaX = 420, leyendaY = 100;
             i = 0;
             for (Map.Entry<String, Double> entry : top) {
                 g2.setColor(colores[i % colores.length]);
-                g2.fillRoundRect(420, leyendaY, 15, 15, 4, 4);
+                g2.fillRoundRect(leyendaX, leyendaY, 15, 15, 4, 4);
+
                 g2.setColor(Color.BLACK);
-                g2.drawString(entry.getKey() + String.format(" (%.1f MB)", entry.getValue()), 445, leyendaY + 12);
-                leyendaY += 22;
+                g2.drawString(entry.getKey() + String.format(" (%.1f MB)", entry.getValue()), leyendaX + 25, leyendaY + 12);
+
+                leyendaY += 25;
                 i++;
             }
 
-            // Barras animadas con gradiente
+            // Barras CPU/memoria
             int barraX = 100;
             int baseY = 420;
-            int anchoBarra = 24;
-            int espacio = 35;
+            int cantidad = top.size();
+            int espacio = Math.max(50, (getWidth() - 200) / cantidad);
+            int anchoBarra = Math.min(35, espacio - 15);
             i = 0;
-
             for (Map.Entry<String, Double> entry : top) {
                 int altura = alturasAnimadas.get(entry.getKey());
                 int xBarra = barraX + i * espacio;
@@ -558,12 +664,17 @@ public void Matar_proceso() {
                 i++;
             }
 
-            // CPU info
+            // Datos del sistema alineados en bloque vertical
+            int infoX = 100, infoY = baseY + 50;
             g2.setColor(Color.DARK_GRAY);
-            g2.drawString("Actividad de procesos (CPU)", 100, baseY + 30);
-            g2.drawString(String.format("CPU: %.1f%%", obtenerUsoCPU() * 100), 100, baseY + 50);
+            g2.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+            g2.drawString("Actividad de procesos (CPU)", infoX, infoY);
+            g2.drawString(String.format("CPU: %.1f%%", obtenerUsoCPU() * 100), infoX, infoY + 25);
+            g2.drawString(String.format("RAM: %.1f GB / %.1f GB", ramUsada, ramTotal), infoX, infoY + 50);
+            g2.drawString(String.format("Disco: %.1f GB / %.1f GB", discoUsado, discoTotal), infoX, infoY + 75);
+            g2.drawString(String.format("Red: ↓ %.1f Mbps ↑ %.1f Mbps", redRx, redTx), infoX, infoY + 100);
         }
-
+// USO DE CPU REAL 
         private double obtenerUsoCPU() {
             try {
                 com.sun.management.OperatingSystemMXBean osBean =
@@ -573,17 +684,84 @@ public void Matar_proceso() {
                 return 0.5;
             }
         }
+
+        private Map<String, Double> obtenerProcesosDesdeWindows() {
+            Map<String, Double> datos = new LinkedHashMap<>();
+            datos.put("operaApp.exe", 320.0);
+            datos.put("FChrome.exe", 210.0);
+            datos.put("TestJava.exe", 180.0);
+            datos.put("DummyExplorer.exe", 95.0);
+            datos.put("Service.exe", 60.0);
+            datos.put("Monitor.exe", 140.0);
+            datos.put("Updater.exe", 110.0);
+            datos.put("Logger.exe", 75.0);
+            datos.put("Backup.exe", 50.0);
+            datos.put("Firewall.exe", 45.0);
+            return datos;
+        }
     };
 
-    ventana.add(panelGrafica);
+    JButton botonActualizar = new JButton("Actualizar Datos");
+    botonActualizar.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+    botonActualizar.setBackground(new Color(0x2563EB));
+    botonActualizar.setForeground(Color.WHITE);
+
+    // Botón solo fuerza repintado
+    botonActualizar.addActionListener(e -> panelGrafica.repaint());
+
+    ventana.setLayout(new BorderLayout());
+    ventana.add(panelGrafica, BorderLayout.CENTER);
+    ventana.add(botonActualizar, BorderLayout.SOUTH);
+
     ventana.setVisible(true);
+
     
     }//GEN-LAST:event_GRAFICActionPerformed
 
     private void nuevatareaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nuevatareaActionPerformed
         // TODO add your handling code here:
 ////////////////////MISHEL///////////////////////////////////////////////////                              
- 
+ JDialog dialogo = new JDialog(this, "Crear nueva tarea", true);
+    dialogo.setSize(420, 180);
+    dialogo.setLayout(null);
+    dialogo.setLocationRelativeTo(this);
+
+    JLabel lblTexto = new JLabel("Escriba el nombre del programa, carpeta, documento o recurso de Internet:");
+    lblTexto.setBounds(20, 10, 380, 20);
+    dialogo.add(lblTexto);
+
+    JLabel lblAbrir = new JLabel("Abrir:");
+    lblAbrir.setBounds(20, 40, 50, 20);
+    dialogo.add(lblAbrir);
+
+    JTextField campo = new JTextField();
+    campo.setBounds(70, 40, 320, 25);
+    dialogo.add(campo);
+
+    JCheckBox admin = new JCheckBox("Crear esta tarea con privilegios administrativos");
+    admin.setBounds(20, 70, 360, 20);
+    dialogo.add(admin);
+
+    JButton ejecutar = new JButton("Aceptar");
+    ejecutar.setBounds(300, 100, 90, 30);
+    dialogo.add(ejecutar);
+
+    ejecutar.addActionListener(ev -> {
+        String comando = campo.getText().trim();
+        if (!comando.isEmpty()) {
+            try {
+                String[] cmd = admin.isSelected()
+                    ? new String[]{"cmd", "/c", "start", "cmd", "/k", comando}
+                    : new String[]{"cmd", "/c", comando};
+                Runtime.getRuntime().exec(cmd);
+                dialogo.dispose();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(dialogo, "Error al ejecutar la tarea", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    });
+
+    dialogo.setVisible(true);
 
     }//GEN-LAST:event_nuevatareaActionPerformed
 
@@ -591,6 +769,62 @@ public void Matar_proceso() {
       
        // TODO add your handling code here:       
       /////////// //MISHEL////////////////////////////////
+      JDialog config = new JDialog(this, "Configuración", true);
+    config.setSize(400, 220);
+    config.setLayout(null);
+    config.setLocationRelativeTo(this);
+
+    JLabel lblTema = new JLabel("Tema de la aplicación:");
+    lblTema.setBounds(20, 20, 150, 20);
+    config.add(lblTema);
+
+    String[] opcionesTema = {"Claro", "Oscuro", "Usar configuración del sistema"};
+    JComboBox<String> comboTema = new JComboBox<>(opcionesTema);
+    comboTema.setBounds(180, 20, 180, 25);
+    config.add(comboTema);
+
+    JLabel lblInicio = new JLabel("Página de inicio predeterminada:");
+    lblInicio.setBounds(20, 60, 200, 20);
+    config.add(lblInicio);
+
+    String[] paginas = {"Procesos", "Rendimiento", "Usuarios", "Detalles"};
+    JComboBox<String> comboInicio = new JComboBox<>(paginas);
+    comboInicio.setBounds(180, 60, 180, 25);
+    config.add(comboInicio);
+
+    JButton guardar = new JButton("Guardar ⚙️");
+    guardar.setBounds(260, 120, 100, 30);
+    config.add(guardar);
+
+    guardar.addActionListener(e -> {
+        String temaSeleccionado = (String) comboTema.getSelectedItem();
+
+        try {
+            switch (temaSeleccionado) {
+                case "Claro":
+                    UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+                    break;
+                case "Oscuro":
+                    UIManager.setLookAndFeel("com.formdev.flatlaf.FlatDarkLaf");
+                    break;
+                case "Usar configuración del sistema":
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                    break;
+            }
+
+            // Actualiza todos los componentes abiertos
+            SwingUtilities.updateComponentTreeUI(this);
+            this.pack(); // opcional: ajusta tamaño si cambia el estilo
+
+            JOptionPane.showMessageDialog(config, "Tema aplicado: " + temaSeleccionado);
+            config.dispose();
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(config, "Error al aplicar el tema", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    });
+
+    config.setVisible(true);
  
     }//GEN-LAST:event_ConfiguracionActionPerformed
 
