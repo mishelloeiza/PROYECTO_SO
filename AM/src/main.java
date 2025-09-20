@@ -55,11 +55,21 @@ import javax.swing.UIManager;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import javax.swing.JScrollPane;
+
 //////////////////////////////////////KATHIA/////////////////////////////////////////////////////////
 public class main extends javax.swing.JFrame {
+    //Atributos globales
     private DefaultTableModel modelo;
     private JTable miTablaProcesos;
-
+    private Map<String, String> historialApps = new LinkedHashMap<>();
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+    
+    
     public main() {
         initComponents();
         getContentPane().setBackground(Color.WHITE);
@@ -69,29 +79,34 @@ public class main extends javax.swing.JFrame {
         mostrar_procesos();
     }
 
+
     private void configurarTabla() {
+        // Se crea un modelo de tabla vacío con nombres de columnas y tipos de datos
         modelo = new DefaultTableModel(new Object[][]{},
-            new String[]{"Aplicaciones", "Nombre", "PID", "Tipo de sesión", "Número de sesión", "memoria"}) {
-            Class[] types = new Class[]{
-                ImageIcon.class, String.class, String.class, String.class, String.class, String.class
-            };
-            boolean[] canEdit = new boolean[]{
-                false, false, false, false, false, false
-            };
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit[columnIndex];
-            }
-
-            public Class<?> getColumnClass(int columnIndex) {
-                return types[columnIndex];
-            }
+        new String[]{"Aplicaciones", "Nombre", "PID", "Tipo de sesión", "Número de sesión", "memoria"}) {
+        // Tipos de datos por columna
+        Class[] types = new Class[]{
+            ImageIcon.class, String.class, String.class, String.class, String.class, String.class
         };
-
+        // Indica si las columnas son editables (todas false)
+        boolean[] canEdit = new boolean[]{false, false, false, false, false, false};
+        // Define si una celda se puede editar
+        @Override
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return canEdit[columnIndex];
+        }
+        // Devuelve el tipo de dato de cada columna
+        @Override
+        public Class<?> getColumnClass(int columnIndex) {
+            return types[columnIndex];
+        }
+        };
+        // Asigna el modelo a la tabla
         jtabla_datos.setModel(modelo);
-
+        // Crea un renderizador para alinear el contenido a la derecha
         DefaultTableCellRenderer Alinear = new DefaultTableCellRenderer();
         Alinear.setHorizontalAlignment(SwingConstants.RIGHT);
+        // Aplica la alineación a las columnas 2 a 5
         for (int col = 2; col <= 5; col++) {
             jtabla_datos.getColumnModel().getColumn(col).setCellRenderer(Alinear);
         }
@@ -213,19 +228,24 @@ public static Map<String, Double> obtenerProcesosDesdeWindows() {
     }
 ///////////////////////////KATHIA/////////////////////////////////////////////////////////
 public void Matar_proceso() {
-        int fila = jtabla_datos.getSelectedRow();
-        if (fila == -1) {
-            JOptionPane.showMessageDialog(this, "ERROR, No se ha seleccionado ningún proceso", "Error", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-        String pid = String.valueOf(modelo.getValueAt(fila, 2));
-        try {
-            Process hijo = Runtime.getRuntime().exec("taskkill /F /PID " + pid);
-            hijo.waitFor();
-        } catch (IOException | InterruptedException ex) {
-            Logger.getLogger(main.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    // fila seleccionada de la tabla
+    int fila = jtabla_datos.getSelectedRow();
+    // Si no se ha seleccionado ninguna fila, muestra un mensaje de error
+    if (fila == -1) {
+        JOptionPane.showMessageDialog(this, "ERROR, No se ha seleccionado ningún proceso", "Error", JOptionPane.INFORMATION_MESSAGE);
+        return;
     }
+    // Obtiene el PID del proceso de la fila seleccionada (columna 2)
+    String pid = String.valueOf(modelo.getValueAt(fila, 2));
+    try {
+        // finaliza el proceso con el PID obtenido
+        Process hijo = Runtime.getRuntime().exec("taskkill /F /PID " + pid);
+        hijo.waitFor(); // Espera a que el comando termine
+    } catch (IOException | InterruptedException ex) {
+        // En caso de error, lo registra en el log
+        Logger.getLogger(main.class.getName()).log(Level.SEVERE, null, ex);
+    }
+}
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -250,9 +270,11 @@ public void Matar_proceso() {
         detalles = new javax.swing.JButton();
         servicios = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
+        jTextFieldFiltro = new javax.swing.JTextField();
+        FILTRARP = new javax.swing.JButton();
+        jLabel7 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setFocusCycleRoot(false);
@@ -313,7 +335,8 @@ public void Matar_proceso() {
             }
         });
 
-        jLabel1.setFont(new java.awt.Font("Showcard Gothic", 0, 18)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("SansSerif", 1, 24)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(0, 51, 51));
         jLabel1.setText("PROCESOS");
 
         jButton1.setForeground(new java.awt.Color(204, 204, 255));
@@ -336,25 +359,45 @@ public void Matar_proceso() {
             }
         });
 
+        Historial.setBackground(new java.awt.Color(0, 0, 51));
+        Historial.setFont(new java.awt.Font("Arial Narrow", 1, 18)); // NOI18N
+        Historial.setForeground(new java.awt.Color(255, 255, 255));
         Historial.setText("Historial de aplicaciones");
+        Historial.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         Historial.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 HistorialActionPerformed(evt);
             }
         });
 
+        arranque.setBackground(new java.awt.Color(0, 0, 51));
+        arranque.setFont(new java.awt.Font("Arial Narrow", 1, 18)); // NOI18N
+        arranque.setForeground(new java.awt.Color(255, 255, 255));
         arranque.setText("aplicaciones de arranque");
+        arranque.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         arranque.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 arranqueActionPerformed(evt);
             }
         });
 
+        usuario.setBackground(new java.awt.Color(0, 0, 51));
+        usuario.setFont(new java.awt.Font("Arial Narrow", 1, 18)); // NOI18N
+        usuario.setForeground(new java.awt.Color(255, 255, 255));
         usuario.setText("Usuarios");
+        usuario.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
+        detalles.setBackground(new java.awt.Color(0, 0, 51));
+        detalles.setFont(new java.awt.Font("Arial Narrow", 1, 18)); // NOI18N
+        detalles.setForeground(new java.awt.Color(255, 255, 255));
         detalles.setText("Detalles");
+        detalles.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
+        servicios.setBackground(new java.awt.Color(0, 0, 51));
+        servicios.setFont(new java.awt.Font("Arial Narrow", 1, 18)); // NOI18N
+        servicios.setForeground(new java.awt.Color(255, 255, 255));
         servicios.setText("Servicios");
+        servicios.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         servicios.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 serviciosActionPerformed(evt);
@@ -363,69 +406,96 @@ public void Matar_proceso() {
 
         jLabel3.setText("ALISSON");
 
-        jLabel4.setText("KATHIA");
-
         jLabel5.setText("PABLO");
 
         jLabel6.setText("Alisson");
+
+        jTextFieldFiltro.setFont(new java.awt.Font("Sylfaen", 2, 18)); // NOI18N
+        jTextFieldFiltro.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
+        jTextFieldFiltro.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldFiltroActionPerformed(evt);
+            }
+        });
+
+        FILTRARP.setBackground(new java.awt.Color(153, 153, 255));
+        FILTRARP.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        FILTRARP.setText("FILTRAR");
+        FILTRARP.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        FILTRARP.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                FILTRARPActionPerformed(evt);
+            }
+        });
+
+        jLabel7.setText("FILTRADO DE PROCESOS:");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(No_procesos, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(GRAFIC, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(No_procesos, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jIniciar_procesos)
-                            .addGroup(layout.createSequentialGroup()
+                                .addGap(6, 6, 6)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(GRAFIC, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(Historial)
+                                    .addComponent(arranque)
+                                    .addComponent(usuario)
+                                    .addComponent(jLabel5)
+                                    .addComponent(detalles)
                                     .addGroup(layout.createSequentialGroup()
                                         .addGap(6, 6, 6)
+                                        .addComponent(jLabel6))
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addComponent(Configuracion)
+                                        .addComponent(servicios)))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 5, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jIniciar_procesos)
+                                    .addComponent(jLabel1))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel7)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addGroup(layout.createSequentialGroup()
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(Historial)
-                                            .addComponent(jLabel4)
-                                            .addComponent(arranque)
-                                            .addComponent(usuario)
-                                            .addComponent(jLabel5)
-                                            .addComponent(detalles)
                                             .addGroup(layout.createSequentialGroup()
-                                                .addGap(6, 6, 6)
-                                                .addComponent(jLabel6))
-                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                                .addComponent(Configuracion)
-                                                .addComponent(servicios)))))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 5, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 909, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(202, 202, 202)
-                        .addComponent(nuevatarea)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jterminar_procesos)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(Eficiencia)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(Vista)))
+                                                .addGap(110, 110, 110)
+                                                .addComponent(FILTRARP))
+                                            .addComponent(jTextFieldFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 70, Short.MAX_VALUE)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(nuevatarea)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(jterminar_procesos)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(Eficiencia)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(Vista))
+                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                .addComponent(jLabel3)
+                                                .addGap(117, 117, 117))))))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 909, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                            .addComponent(jLabel3)
-                            .addGap(129, 129, 129))
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                            .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 920, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addContainerGap()))))
+                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 920, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -435,46 +505,57 @@ public void Matar_proceso() {
                     .addComponent(jLabel2)
                     .addComponent(No_procesos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jIniciar_procesos)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(nuevatarea)
-                    .addComponent(jterminar_procesos)
-                    .addComponent(Eficiencia)
-                    .addComponent(Vista)
-                    .addComponent(jLabel1))
-                .addGap(20, 20, 20)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 7, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jIniciar_procesos)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 9, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(GRAFIC)
-                        .addGap(12, 12, 12)
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(Historial)
-                        .addGap(18, 18, 18)
-                        .addComponent(arranque)
-                        .addGap(14, 14, 14)
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(usuario)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(detalles)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(servicios)
-                        .addGap(49, 49, 49)
-                        .addComponent(Configuracion)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addContainerGap())
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel1)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel7)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jTextFieldFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(FILTRARP)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 7, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                        .addComponent(jLabel3)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                            .addComponent(nuevatarea)
+                                            .addComponent(jterminar_procesos)
+                                            .addComponent(Eficiencia)
+                                            .addComponent(Vista))
+                                        .addGap(11, 11, 11)))))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(GRAFIC)
+                                        .addGap(41, 41, 41)
+                                        .addComponent(Historial)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(arranque)
+                                        .addGap(14, 14, 14)
+                                        .addComponent(jLabel6)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(usuario)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jLabel5)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(detalles)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(servicios)
+                                        .addGap(49, 49, 49)
+                                        .addComponent(Configuracion))))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(7, 7, 7)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -827,9 +908,75 @@ public void Matar_proceso() {
     config.setVisible(true);
  
     }//GEN-LAST:event_ConfiguracionActionPerformed
-
+// HISTORIAL DE APLICACIONES POR KATHIA CONTRERAS //
     private void HistorialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_HistorialActionPerformed
-        // TODO add your handling code here:
+        // Crea ventana de historial
+        JDialog historialVentana = new JDialog(this, "Historial de Aplicaciones", true);
+        historialVentana.setSize(800, 450);
+        historialVentana.setLocationRelativeTo(this);
+        historialVentana.setLayout(new BorderLayout()); // Usar BorderLayout para organizar componentes
+
+        // Panel principal con color de fondo
+        JPanel panelPrincipal = new JPanel(new BorderLayout());
+        panelPrincipal.setBackground(new Color(240, 248, 255)); 
+
+        // Crea modelo de tabla con columnas para el historial
+        DefaultTableModel historialModel = new DefaultTableModel(
+            new Object[]{"Aplicación", "Primera detección", "Tiempo de CPU", "Memoria"}, 0
+        );
+        JTable tablaHistorial = new JTable(historialModel);
+
+        //visibilidad de la tabla
+        tablaHistorial.setFillsViewportHeight(true);
+        tablaHistorial.setRowHeight(25);
+        tablaHistorial.getTableHeader().setBackground(new Color(70, 130, 180)); // SteelBlue
+        tablaHistorial.getTableHeader().setForeground(Color.WHITE);
+        tablaHistorial.setGridColor(Color.LIGHT_GRAY);
+
+        // Llenado de la tabla con información de procesos del sistema
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"cmd", "/c", "tasklist /V /FO CSV /NH"});
+            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream(), "Cp1252"));
+            String line;
+            while ((line = input.readLine()) != null) {
+                String[] parts = line.split("\",\"");
+                if (parts.length >= 8) {
+                    String nombreExe = parts[0].replace("\"", "").trim(); // Nombre del proceso
+                    String cpuTime = parts[7].replace("\"", "").trim();   // Tiempo de CPU
+                    String memoria = parts[4].replace("\"", "").trim();   // Memoria usada
+
+                    String fecha = historialApps.getOrDefault(nombreExe, "---"); // Fecha de detección
+                    historialModel.addRow(new Object[]{nombreExe, fecha, cpuTime, memoria});
+                }
+            }
+            input.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        JScrollPane scroll = new JScrollPane(tablaHistorial);
+        panelPrincipal.add(scroll, BorderLayout.CENTER);
+
+        //Boton de salida para regresar al administrador
+        JButton btnRegresar = new JButton("Regresar a Administrador");
+        btnRegresar.setBackground(new Color(70, 130, 180)); // SteelBlue
+        btnRegresar.setForeground(Color.WHITE);
+        btnRegresar.setFocusPainted(false);
+        btnRegresar.setFont(new Font("Arial", Font.BOLD, 14));
+        btnRegresar.addActionListener(e -> historialVentana.dispose()); // Cierra la ventana al presionar
+
+        // Panel para botón
+        JPanel panelBoton = new JPanel();
+        panelBoton.setBackground(new Color(240, 248, 255));
+        panelBoton.add(btnRegresar);
+
+        // Agregar panel del botón al panel principal
+        panelPrincipal.add(panelBoton, BorderLayout.SOUTH);
+
+        // Agregar panel principal a la ventana
+        historialVentana.add(panelPrincipal);
+        historialVentana.setVisible(true);
+
     }//GEN-LAST:event_HistorialActionPerformed
 
     private void VistaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VistaActionPerformed
@@ -904,12 +1051,100 @@ public void Matar_proceso() {
     }//GEN-LAST:event_VistaActionPerformed
 
     private void arranqueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arranqueActionPerformed
-        // TODO add your handling code here:
+        // Crea ventana para mostrar aplicaciones de arranque
+        JDialog arranqueVentana = new JDialog(this, "Aplicaciones de Arranque", true);
+        arranqueVentana.setSize(700, 450);
+        arranqueVentana.setLocationRelativeTo(this);
+        arranqueVentana.setLayout(new BorderLayout());
+
+        // Panel principal con color de fondo
+        JPanel panelPrincipal = new JPanel(new BorderLayout());
+        panelPrincipal.setBackground(new Color(245, 245, 245)); // Fondo gris claro
+
+        // Crea modelo de tabla con columnas para nombre de aplicación y ruta
+        DefaultTableModel arranqueModel = new DefaultTableModel(
+            new Object[]{"Aplicación", "Ruta de ejecución"}, 0
+        );
+        JTable tablaArranque = new JTable(arranqueModel);
+
+        //visibilidad de la tabla
+        tablaArranque.setFillsViewportHeight(true);
+        tablaArranque.setRowHeight(25);
+        tablaArranque.getTableHeader().setBackground(new Color(70, 130, 180)); // SteelBlue
+        tablaArranque.getTableHeader().setForeground(Color.WHITE);
+        tablaArranque.setGridColor(Color.LIGHT_GRAY);
+
+        // Llenado de tabla con aplicaciones de inicio del sistema
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"cmd", "/c", "wmic startup get caption,command /format:csv"});
+            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream(), "Cp1252"));
+            String line;
+            while ((line = input.readLine()) != null) {
+                if (!line.trim().isEmpty() && line.contains(",")) { // Ignora líneas vacías
+                    String[] parts = line.split(",");
+                    if (parts.length >= 3) {
+                        String app = parts[1].trim();  // Nombre de la aplicación
+                        String ruta = parts[2].trim(); // Ruta de ejecución
+                        if (!app.isEmpty()) {
+                            arranqueModel.addRow(new Object[]{app, ruta});
+                        }
+                    }
+                }
+            }
+            input.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Agregar tabla un JScrollPane y al panel principal
+        JScrollPane scroll = new JScrollPane(tablaArranque);
+        panelPrincipal.add(scroll, BorderLayout.CENTER);
+
+        //BOTON DE SALIDA 
+        JButton btnRegresar = new JButton("Regresar a Administrador");
+        btnRegresar.setBackground(new Color(70, 130, 180)); // SteelBlue
+        btnRegresar.setForeground(Color.WHITE);
+        btnRegresar.setFocusPainted(false);
+        btnRegresar.setFont(new Font("Arial", Font.BOLD, 14));
+        btnRegresar.addActionListener(e -> arranqueVentana.dispose()); // Cierra la ventana
+
+        // Panel para el botón
+        JPanel panelBoton = new JPanel();
+        panelBoton.setBackground(new Color(245, 245, 245));
+        panelBoton.add(btnRegresar);
+
+        // Agrega panel del botón al panel principal
+        panelPrincipal.add(panelBoton, BorderLayout.SOUTH);
+
+        // Agrega panel principal a la ventana y lo muestra
+        arranqueVentana.add(panelPrincipal);
+        arranqueVentana.setVisible(true);
     }//GEN-LAST:event_arranqueActionPerformed
 
     private void serviciosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serviciosActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_serviciosActionPerformed
+
+    private void jTextFieldFiltroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldFiltroActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldFiltroActionPerformed
+
+    private void FILTRARPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FILTRARPActionPerformed
+       //BOTON DE FILTRADO DE PROCESOS --- HECHO POR KATHIA CONTRERAS
+        //Toma los datos del textfield
+        String filtro = jTextFieldFiltro.getText().trim().toLowerCase();
+        //recarga todos los procesos
+        mostrar_procesos();
+        //elimina filas que no coincidan con el filtro
+        if (!filtro.isEmpty()) {
+            for (int i = modelo.getRowCount() - 1; i >= 0; i--) {
+                String nombre = modelo.getValueAt(i, 1).toString().toLowerCase();
+                if (!nombre.contains(filtro)) {
+                    modelo.removeRow(i); // eliminar fila que no coincide
+                }
+            }
+        }
+    }//GEN-LAST:event_FILTRARPActionPerformed
 
     /**
      * @param args the command line arguments
@@ -949,6 +1184,7 @@ public void Matar_proceso() {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton Configuracion;
     private javax.swing.JButton Eficiencia;
+    private javax.swing.JButton FILTRARP;
     private javax.swing.JButton GRAFIC;
     private javax.swing.JButton Historial;
     private javax.swing.JTextField No_procesos;
@@ -961,10 +1197,11 @@ public void Matar_proceso() {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextField jTextFieldFiltro;
     private javax.swing.JTable jtabla_datos;
     private javax.swing.JButton jterminar_procesos;
     private javax.swing.JButton nuevatarea;
