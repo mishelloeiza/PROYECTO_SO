@@ -11,6 +11,7 @@ import java.util.List;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
@@ -20,6 +21,8 @@ import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,7 +41,12 @@ import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.io.File;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.Random;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -46,6 +54,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.RowFilter;
@@ -104,6 +113,34 @@ public class main extends javax.swing.JFrame {
     // 🔁 Activar ordenamiento por encabezado
     TableRowSorter<TableModel> sorter = new TableRowSorter<>(modelo);
     jtabla_datos.setRowSorter(sorter);
+    jtabla_datos.getTableHeader().addMouseListener(new MouseAdapter() {
+    private int ultimaColumna = -1;
+    private boolean ascendente = true;
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        int col = jtabla_datos.columnAtPoint(e.getPoint());
+        String nombreColumna = jtabla_datos.getColumnName(col);
+
+        System.out.println("Se hizo clic en: " + nombreColumna);
+
+        TableRowSorter<?> sorter = (TableRowSorter<?>) jtabla_datos.getRowSorter();
+
+        // Si se da clic en la misma columna, alternar orden
+        if (col == ultimaColumna) {
+            ascendente = !ascendente;
+        } else {
+            ascendente = true; // Nueva columna → siempre empieza ascendente
+            ultimaColumna = col;
+        }
+
+        SortOrder orden = ascendente ? SortOrder.ASCENDING : SortOrder.DESCENDING;
+        sorter.setSortKeys(
+            Arrays.asList(new RowSorter.SortKey(col, orden))
+        );
+    }
+});
+
 
     // 🧠 Comparadores numéricos para columnas con texto numérico
     sorter.setComparator(5, (a, b) -> compararNumeros(a, b)); // Memoria
@@ -289,6 +326,9 @@ public void Matar_proceso() {
         usuario = new javax.swing.JButton();
         detalles = new javax.swing.JButton();
         servicios = new javax.swing.JButton();
+        jTextFieldFiltro = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        jButton3 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setFocusCycleRoot(false);
@@ -397,53 +437,77 @@ public void Matar_proceso() {
             }
         });
 
+        jTextFieldFiltro.setFont(new java.awt.Font("Sylfaen", 2, 18)); // NOI18N
+        jTextFieldFiltro.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
+        jTextFieldFiltro.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldFiltroActionPerformed(evt);
+            }
+        });
+
+        jLabel7.setText("BUSQUEDA DE PROCESOS:");
+
+        jButton3.setText("BUSCAR");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(jLabel2)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(No_procesos, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addComponent(jIniciar_procesos)
-                        .addGroup(layout.createSequentialGroup()
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(6, 6, 6)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(Historial)
-                                            .addComponent(arranque, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(GRAFIC, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(Configuracion, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(servicios, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addComponent(detalles, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(usuario, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 5, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 909, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(nuevatarea)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jterminar_procesos)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(Eficiencia)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(Vista)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 920, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())))
+                        .addComponent(jIniciar_procesos)
+                        .addGap(140, 140, 140)
+                        .addComponent(jLabel7)
+                        .addGap(28, 28, 28)
+                        .addComponent(jTextFieldFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, 392, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(44, 44, 44)
+                        .addComponent(jButton3))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(No_procesos, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGap(6, 6, 6)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(Historial)
+                                        .addComponent(arranque, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(GRAFIC, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(Configuracion, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(servicios, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(detalles, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(usuario, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 5, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 909, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(nuevatarea)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jterminar_procesos)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(Eficiencia)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(Vista)
+                                .addGap(38, 38, 38))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(38, 38, 38)
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 920, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(234, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -452,17 +516,35 @@ public void Matar_proceso() {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(No_procesos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jIniciar_procesos)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 29, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(nuevatarea)
-                    .addComponent(jterminar_procesos)
-                    .addComponent(Eficiencia)
-                    .addComponent(Vista)
-                    .addComponent(jLabel1))
-                .addGap(20, 20, 20)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 7, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(15, 15, 15)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jIniciar_procesos)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(0, 6, Short.MAX_VALUE)
+                                        .addComponent(jButton3)
+                                        .addGap(42, 42, 42))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                            .addComponent(jTextFieldFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jLabel7))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(nuevatarea)
+                                    .addComponent(jterminar_procesos)
+                                    .addComponent(Eficiencia)
+                                    .addComponent(Vista))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 7, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel1)
+                        .addGap(11, 11, 11)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
@@ -484,7 +566,7 @@ public void Matar_proceso() {
                                 .addComponent(servicios)
                                 .addGap(29, 29, 29)
                                 .addComponent(Configuracion)))
-                        .addGap(0, 9, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -840,7 +922,162 @@ public void Matar_proceso() {
     }//GEN-LAST:event_ConfiguracionActionPerformed
 
     private void HistorialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_HistorialActionPerformed
-        // TODO add your handling code here:
+        Locale spanishLocale = new Locale("es", "ES");
+       LocalDate fechaActual = LocalDate.now();
+       // Formato para mostrar la fecha
+       DateTimeFormatter formatoTitulo = DateTimeFormatter.ofPattern("dd 'de' MMMM 'de' yyyy", spanishLocale);
+       String fechaFormateada = fechaActual.format(formatoTitulo);
+       // Formato para comparar con la salida del sistema 
+       String fechaParaFiltrar = fechaActual.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+       // Crea ventana de historial
+       JDialog historialVentana = new JDialog(this, "Historial de aplicaciones", true);
+       historialVentana.setSize(800, 500);
+       historialVentana.setLocationRelativeTo(this);
+       historialVentana.setLayout(new BorderLayout());
+
+       // Panel principal con color de fondo
+       JPanel panelPrincipal = new JPanel(new BorderLayout(10, 10));
+       panelPrincipal.setBackground(new Color(240, 248, 255));
+       panelPrincipal.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+       // --- TÍTULO CON LA FECHA DEL SISTEMA ---
+       JLabel lblTituloFecha = new JLabel("Procesos iniciados el: " + fechaFormateada, SwingConstants.CENTER);
+       lblTituloFecha.setFont(new Font("Arial", Font.BOLD, 16));
+       panelPrincipal.add(lblTituloFecha, BorderLayout.NORTH);
+
+       // Crea modelo de tabla con las columnas deseadas
+       DefaultTableModel historialModel = new DefaultTableModel(
+               new Object[]{"Nombre", "Tiempo de CPU", "RED (I/O)", "Notificación en MB"}, 0
+       ) {
+           // Para que las celdas no sean editables
+           @Override
+           public boolean isCellEditable(int row, int column) {
+               return false;
+           }
+       };
+       JTable tablaHistorial = new JTable(historialModel);
+
+       // visibilidad de la tabla
+       tablaHistorial.setFillsViewportHeight(true);
+       tablaHistorial.setRowHeight(25);
+       tablaHistorial.getTableHeader().setBackground(new Color(70, 130, 180));
+       tablaHistorial.getTableHeader().setForeground(Color.WHITE);
+       tablaHistorial.setGridColor(Color.LIGHT_GRAY);
+
+       //LLENADO DE LA TABLA CON FILTRO DE FECHA ---
+       try {
+           // Se añade "CreationDate" al comando para poder filtrar por fecha
+           String command = "wmic process get Name,CreationDate,KernelModeTime,UserModeTime,ReadOperationCount,WriteOperationCount,WorkingSetSize /format:csv";
+           Process p = Runtime.getRuntime().exec(new String[]{"cmd", "/c", command});
+           BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+           String line;
+
+           input.readLine(); // Salta la primera línea en blanco
+           input.readLine(); // Salta la cabecera
+
+           while ((line = input.readLine()) != null) {
+               if (line.trim().isEmpty()) continue;
+
+               String[] parts = line.split(",");
+               // El orden de columnas de wmic es: Node, CreationDate, KernelModeTime, Name, ReadOperationCount...
+               if (parts.length >= 8) {
+                   try {
+                       String creationDate = parts[1].trim();
+                       // --- SE APLICA EL FILTRO: Solo procesar si la fecha coincide con la del dia ---
+                       if (creationDate != null && creationDate.startsWith(fechaParaFiltrar)) {
+                           String nombreExe = parts[3].trim();
+
+                           long kernelTime = Long.parseLong(parts[2].trim());
+                           long userTime = Long.parseLong(parts[5].trim());
+                           long totalCpuSeconds = (kernelTime + userTime) / 10_000_000;
+                           String cpuTimeFormatted = String.format("%02d:%02d:%02d",
+                                   totalCpuSeconds / 3600, (totalCpuSeconds % 3600) / 60, totalCpuSeconds % 60);
+
+                           long readOps = Long.parseLong(parts[4].trim());
+                           long writeOps = Long.parseLong(parts[7].trim());
+                           String ioTotal = String.format("%,d", readOps + writeOps);
+
+                           long memoryBytes = Long.parseLong(parts[6].trim());
+                           double memoryMB = memoryBytes / (1024.0 * 1024.0);
+                           String memoriaFormatted = String.format("%.2f", memoryMB);
+
+                           historialModel.addRow(new Object[]{nombreExe, cpuTimeFormatted, ioTotal, memoriaFormatted});
+                       }
+                   } catch (Exception ex) {
+                       // Ignorar líneas malformadas
+                   }
+               }
+           }
+           input.close();
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
+
+       JScrollPane scroll = new JScrollPane(tablaHistorial);
+       panelPrincipal.add(scroll, BorderLayout.CENTER);
+
+       //  BOTONES CON LÓGICA DE ELIMINACIÓN DE HISTORIAL
+       JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+       panelBotones.setBackground(new Color(240, 248, 255));
+
+       // Botón para eliminar el historial de actividad de Windows
+       JButton btnEliminarHistorial = new JButton("Borrar Historial de Actividad");
+       btnEliminarHistorial.setBackground(new Color(0, 120, 215)); // Azul estándar
+       btnEliminarHistorial.setForeground(Color.WHITE);
+       btnEliminarHistorial.setFont(new Font("Arial", Font.BOLD, 14));
+       btnEliminarHistorial.addActionListener(e -> {
+           int confirm = JOptionPane.showConfirmDialog(historialVentana,
+                   "<html><body width='350'>Esto eliminará el <b>historial de actividad de Windows</b> de tu cuenta (aplicaciones, archivos y sitios web recientes).<br><br>" +
+                   "Los procesos en ejecución que ves en la tabla no se verán afectados.<br><br>" +
+                   "¿Deseas continuar?</body></html>",
+                   "Confirmar Borrado de Historial",
+                   JOptionPane.YES_NO_OPTION,
+                   JOptionPane.INFORMATION_MESSAGE);
+
+           if (confirm == JOptionPane.YES_OPTION) {
+               try {
+                   // Secuencia de comandos para detener servicio, borrar archivo y reiniciar servicio
+                   String[] commands = {
+                       "cmd", "/c", 
+                       "net stop CDPSvc && " +
+                       "del /F /Q \"%LOCALAPPDATA%\\ConnectedDevicesPlatform\\L.%USERNAME%\\ActivitiesCache.db\" && " +
+                       "net start CDPSvc"
+                   };
+
+                   Process process = Runtime.getRuntime().exec(commands);
+                   int exitCode = process.waitFor();
+
+                   if (exitCode == 0) {
+                       JOptionPane.showMessageDialog(historialVentana, "El historial de actividad de Windows ha sido eliminado correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                   } else {
+                       JOptionPane.showMessageDialog(historialVentana, "Error al eliminar el historial. Es posible que necesites ejecutar la aplicación como Administrador.", "Error de Permisos", JOptionPane.ERROR_MESSAGE);
+                   }
+               } catch (Exception ex) {
+                   JOptionPane.showMessageDialog(historialVentana, "Ocurrió un error. Asegúrate de tener permisos de Administrador.", "Error", JOptionPane.ERROR_MESSAGE);
+                   ex.printStackTrace();
+               }
+           }
+       });
+       panelBotones.add(btnEliminarHistorial);
+
+       // Botón de salida para regresar al administrador
+       JButton btnRegresar = new JButton("Regresar");
+       btnRegresar.setBackground(new Color(108, 117, 125)); // Gris
+       btnRegresar.setForeground(Color.WHITE);
+       btnRegresar.setFont(new Font("Arial", Font.BOLD, 14));
+       btnRegresar.addActionListener(e -> historialVentana.dispose());
+       panelBotones.add(btnRegresar);
+
+       // Agregar panel de botones al panel principal
+       panelPrincipal.add(panelBotones, BorderLayout.SOUTH);
+
+       // Agregar panel principal a la ventana
+       historialVentana.add(panelPrincipal);
+       historialVentana.setVisible(true);
+
+         
+
     }//GEN-LAST:event_HistorialActionPerformed
 
     private void VistaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VistaActionPerformed
@@ -915,12 +1152,111 @@ public void Matar_proceso() {
     }//GEN-LAST:event_VistaActionPerformed
 
     private void arranqueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arranqueActionPerformed
-        // TODO add your handling code here:
+    //HECHO POR KATHIA CONTRERAS        
+    // Crea ventana 
+     JDialog arranqueVentana = new JDialog(this, "Aplicaciones de Arranque", true);
+     arranqueVentana.setSize(700, 450);
+     arranqueVentana.setLocationRelativeTo(this);
+     arranqueVentana.setLayout(new BorderLayout());
+
+     // Panel principal
+     JPanel panelPrincipal = new JPanel(new BorderLayout());
+     panelPrincipal.setBackground(new Color(245, 245, 245)); // Gris claro
+
+     // Modelo de tabla
+     DefaultTableModel arranqueModel = new DefaultTableModel(
+         new Object[]{"Nombre", "Anunciante", "Estado", "Impacto de inicio"}, 0
+     );
+     JTable tablaArranque = new JTable(arranqueModel);
+
+     // Configuración visual
+     tablaArranque.setFillsViewportHeight(true);
+     tablaArranque.setRowHeight(25);
+     tablaArranque.getTableHeader().setBackground(new Color(70, 130, 180));
+     tablaArranque.getTableHeader().setForeground(Color.WHITE);
+     tablaArranque.setGridColor(Color.LIGHT_GRAY);
+
+     // Llenado de tabla con WMIC
+     try {
+         Process p = Runtime.getRuntime().exec(new String[]{
+             "cmd", "/c", "wmic startup get caption,description,location /format:csv"
+         });
+         BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream(), "Cp1252"));
+         String line;
+         while ((line = input.readLine()) != null) {
+             if (!line.trim().isEmpty() && line.contains(",")) {
+                 String[] parts = line.split(",", -1);
+                 if (parts.length >= 4) {
+                     String nombre = parts[1].trim();     // Captura Nombre
+                     String anunciante = parts[2].trim(); // Descripcion Anunciante
+                     String estado = "Habilitado";        // Solo habilitados por uso de wmic
+
+                     // Simulación de impacto de inicio
+                     String impacto;
+                     if (nombre.length() <= 5) {
+                         impacto = "Bajo";
+                     } else if (nombre.length() <= 10) {
+                         impacto = "Medio";
+                     } else {
+                         impacto = "Alto";
+                     }
+
+                     if (!nombre.isEmpty()) {
+                         arranqueModel.addRow(new Object[]{nombre, anunciante, estado, impacto});
+                     }
+                 }
+             }
+         }
+         input.close();
+     } catch (Exception ex) {
+         ex.printStackTrace();
+     }
+
+     // Scroll y panel principal
+     JScrollPane scroll = new JScrollPane(tablaArranque);
+     panelPrincipal.add(scroll, BorderLayout.CENTER);
+
+     // Botón de regreso
+     JButton btnRegresar = new JButton("Regresar a Administrador");
+     btnRegresar.setBackground(new Color(70, 130, 180));
+     btnRegresar.setForeground(Color.WHITE);
+     btnRegresar.setFocusPainted(false);
+     btnRegresar.setFont(new Font("Arial", Font.BOLD, 14));
+     btnRegresar.addActionListener(ev -> arranqueVentana.dispose());
+
+     JPanel panelBoton = new JPanel();
+     panelBoton.setBackground(new Color(245, 245, 245));
+     panelBoton.add(btnRegresar);
+     panelPrincipal.add(panelBoton, BorderLayout.SOUTH);
+
+     arranqueVentana.add(panelPrincipal);
+     arranqueVentana.setVisible(true);
     }//GEN-LAST:event_arranqueActionPerformed
 
     private void serviciosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serviciosActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_serviciosActionPerformed
+
+    private void jTextFieldFiltroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldFiltroActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldFiltroActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        //BOTON DE FILTRADO DE PROCESOS --- HECHO POR KATHIA CONTRERAS
+        //Toma los datos del textfield
+        String filtro = jTextFieldFiltro.getText().trim().toLowerCase();
+        //recarga todos los procesos
+        mostrar_procesos();
+        //elimina filas que no coincidan con el filtro
+        if (!filtro.isEmpty()) {
+            for (int i = modelo.getRowCount() - 1; i >= 0; i--) {
+                String nombre = modelo.getValueAt(i, 1).toString().toLowerCase();
+                if (!nombre.contains(filtro)) {
+                    modelo.removeRow(i); // eliminar fila que no coincide
+                }
+            }
+        }
+    }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -968,10 +1304,13 @@ public void Matar_proceso() {
     private javax.swing.JButton detalles;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JButton jIniciar_procesos;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextField jTextFieldFiltro;
     private javax.swing.JTable jtabla_datos;
     private javax.swing.JButton jterminar_procesos;
     private javax.swing.JButton nuevatarea;
