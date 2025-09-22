@@ -390,7 +390,7 @@ public double obtenerUsoCPU() {
             }
         });
 
-        jtabla_datos.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jtabla_datos.setBorder(javax.swing.BorderFactory.createLineBorder(null));
         jtabla_datos.setFont(new java.awt.Font("Footlight MT Light", 1, 14)); // NOI18N
         jtabla_datos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -427,7 +427,7 @@ public double obtenerUsoCPU() {
         jLabel2.setText("TOTAL DE PROCESOS: ");
 
         No_procesos.setFont(new java.awt.Font("Sylfaen", 1, 24)); // NOI18N
-        No_procesos.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        No_procesos.setBorder(javax.swing.BorderFactory.createLineBorder(null));
         No_procesos.setEnabled(false);
         No_procesos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -489,6 +489,11 @@ public double obtenerUsoCPU() {
         usuario.setText("Usuarios");
 
         detalles.setText("Detalles");
+        detalles.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                detallesActionPerformed(evt);
+            }
+        });
 
         servicios.setText("Servicios");
         servicios.addActionListener(new java.awt.event.ActionListener() {
@@ -498,7 +503,7 @@ public double obtenerUsoCPU() {
         });
 
         jTextFieldFiltro.setFont(new java.awt.Font("Segoe UI Black", 2, 14)); // NOI18N
-        jTextFieldFiltro.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jTextFieldFiltro.setBorder(javax.swing.BorderFactory.createLineBorder(null));
         jTextFieldFiltro.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
         jTextFieldFiltro.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -516,7 +521,7 @@ public double obtenerUsoCPU() {
             }
         });
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(null));
         jPanel1.setEnabled(false);
         jPanel1.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
         jPanel1.addAncestorListener(new javax.swing.event.AncestorListener() {
@@ -645,12 +650,13 @@ public double obtenerUsoCPU() {
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(50, 50, 50)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(Eficiencia)
-                    .addComponent(Vista)
-                    .addComponent(jterminar_procesos)
-                    .addComponent(nuevatarea)
-                    .addComponent(jLabel1))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(Vista)
+                        .addComponent(jterminar_procesos)
+                        .addComponent(nuevatarea)
+                        .addComponent(jLabel1)))
                 .addGap(10, 10, 10)
                 .addComponent(jButton2)
                 .addGap(6, 6, 6)
@@ -1331,6 +1337,36 @@ public double obtenerUsoCPU() {
 
     private void serviciosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serviciosActionPerformed
         // TODO add your handling code here:
+        DefaultTableModel modelo = new DefaultTableModel();
+    modelo.addColumn("Nombre Imagen");
+    modelo.addColumn("PID");
+    modelo.addColumn("Servicios");
+
+    try {
+        Process proceso = Runtime.getRuntime().exec("tasklist /svc");
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(proceso.getInputStream()));
+
+        String linea;
+        boolean empezar = false;
+        while ((linea = reader.readLine()) != null) {
+            if (linea.contains("====")) { // separador de encabezado
+                empezar = true;
+                continue;
+            }
+            if (empezar && !linea.trim().isEmpty()) {
+                String nombre = linea.length() >= 25 ? linea.substring(0, 25).trim() : linea.trim();
+                String pid = linea.length() >= 35 ? linea.substring(25, 35).trim() : "";
+                String servicios = linea.length() > 35 ? linea.substring(35).trim() : "";
+                modelo.addRow(new Object[]{nombre, pid, servicios});
+            }
+        }
+        reader.close();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    jtabla_datos.setModel(modelo);
     }//GEN-LAST:event_serviciosActionPerformed
 
     private void jTextFieldFiltroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldFiltroActionPerformed
@@ -1410,6 +1446,31 @@ public double obtenerUsoCPU() {
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
 getContentPane().setBackground(new Color(230, 230, 250));       // TODO add your handling code here:
     }//GEN-LAST:event_formWindowOpened
+
+    private void detallesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_detallesActionPerformed
+        // TODO add your handling code here:
+        DefaultTableModel modelo = new DefaultTableModel();
+    modelo.addColumn("PID");
+    modelo.addColumn("Nombre");
+    modelo.addColumn("Usuario");
+
+    ProcessHandle.allProcesses()
+        .forEach(ph -> {
+            try {
+                String nombre = ph.info().command().orElse("Desconocido");
+                String usuario = ph.info().user().orElse("Sistema");
+                modelo.addRow(new Object[]{
+                        ph.pid(),
+                        nombre,
+                        usuario
+                });
+            } catch (Exception e) {
+                // ignorar procesos a los que no se puede acceder
+            }
+        });
+
+    jtabla_datos.setModel(modelo);
+    }//GEN-LAST:event_detallesActionPerformed
 
     /**
      * @param args the command line arguments
