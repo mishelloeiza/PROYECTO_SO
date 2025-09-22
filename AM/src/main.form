@@ -307,6 +307,9 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="\ud83c\udf43Modo de Eficiencia" containsInvalidXMLChars="true"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="EficienciaActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="Vista">
       <Properties>
@@ -336,6 +339,9 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Usuarios"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="usuarioActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="detalles">
       <Properties>

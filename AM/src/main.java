@@ -391,7 +391,7 @@ public double obtenerUsoCPU() {
             }
         });
 
-        jtabla_datos.setBorder(javax.swing.BorderFactory.createLineBorder(null));
+        jtabla_datos.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         jtabla_datos.setFont(new java.awt.Font("Footlight MT Light", 1, 14)); // NOI18N
         jtabla_datos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -428,7 +428,7 @@ public double obtenerUsoCPU() {
         jLabel2.setText("TOTAL DE PROCESOS: ");
 
         No_procesos.setFont(new java.awt.Font("Sylfaen", 1, 24)); // NOI18N
-        No_procesos.setBorder(javax.swing.BorderFactory.createLineBorder(null));
+        No_procesos.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         No_procesos.setEnabled(false);
         No_procesos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -465,6 +465,11 @@ public double obtenerUsoCPU() {
         });
 
         Eficiencia.setText("🍃Modo de Eficiencia");
+        Eficiencia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                EficienciaActionPerformed(evt);
+            }
+        });
 
         Vista.setText(". . .");
         Vista.addActionListener(new java.awt.event.ActionListener() {
@@ -488,6 +493,11 @@ public double obtenerUsoCPU() {
         });
 
         usuario.setText("Usuarios");
+        usuario.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                usuarioActionPerformed(evt);
+            }
+        });
 
         detalles.setText("Detalles");
         detalles.addActionListener(new java.awt.event.ActionListener() {
@@ -504,7 +514,7 @@ public double obtenerUsoCPU() {
         });
 
         jTextFieldFiltro.setFont(new java.awt.Font("Segoe UI Black", 2, 14)); // NOI18N
-        jTextFieldFiltro.setBorder(javax.swing.BorderFactory.createLineBorder(null));
+        jTextFieldFiltro.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         jTextFieldFiltro.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
         jTextFieldFiltro.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -522,7 +532,7 @@ public double obtenerUsoCPU() {
             }
         });
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(null));
+        jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         jPanel1.setEnabled(false);
         jPanel1.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
         jPanel1.addAncestorListener(new javax.swing.event.AncestorListener() {
@@ -1482,6 +1492,28 @@ getContentPane().setBackground(new Color(230, 230, 250));       // TODO add your
 
     jtabla_datos.setModel(modelo);
     }//GEN-LAST:event_detallesActionPerformed
+
+    private void usuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usuarioActionPerformed
+        // TODO add your handling code here:
+      ////////////// ///MISHEL///////////////
+        try {
+        String usuario = System.getProperty("user.name");//muestra el nombre de usuario real de Windows
+        String sistema = System.getProperty("os.name");
+        String arquitectura = System.getProperty("os.arch");
+
+        String mensaje = "👤 Usuario actual: " + usuario +
+                         "\n🖥️ Sistema operativo: " + sistema + //muestra el nombre del sistema operativo
+                         "\n⚙️ Arquitectura: " + arquitectura;
+
+        JOptionPane.showMessageDialog(this, mensaje, "Información del Usuario", JOptionPane.INFORMATION_MESSAGE);
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "No se pudo obtener la información del usuario.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    }//GEN-LAST:event_usuarioActionPerformed
+
+    private void EficienciaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EficienciaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_EficienciaActionPerformed
 
     /**
      * @param args the command line arguments
