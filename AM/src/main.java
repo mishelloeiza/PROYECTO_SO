@@ -11,6 +11,7 @@ import java.util.List;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GradientPaint;
@@ -1400,6 +1401,16 @@ public double obtenerUsoCPU() {
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         // TODO add your handling code here:
+       
+    try {
+        File htmlFile = new File("C:\\Users\\user\\Desktop\\AYUDASMISHEL\\manual_usuario4.html");
+        Desktop.getDesktop().browse(htmlFile.toURI());
+    } catch (IOException e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this, "No se pudo abrir el manual HTML.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void PROCESOSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PROCESOSActionPerformed
