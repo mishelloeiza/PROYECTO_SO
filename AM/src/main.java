@@ -112,7 +112,8 @@ public class main extends javax.swing.JFrame {
 
     jtabla_datos.setModel(modelo);
 
-    // 🔁 Activar ordenamiento por encabezado
+/////////////////////MISHEL/////////////////////////////////////////////////////////
+    //  Activar ordenamiento por encabezado
     TableRowSorter<TableModel> sorter = new TableRowSorter<>(modelo);
     jtabla_datos.setRowSorter(sorter);
     jtabla_datos.getTableHeader().addMouseListener(new MouseAdapter() {
@@ -195,7 +196,7 @@ public class main extends javax.swing.JFrame {
         err.printStackTrace();
     }
 }
- //MISHEL FILTROS DE ORDEN
+ ////////////////MISHEL FILTROS DE ORDEN/////////////////////////////////////////////////////
  private int compararNumeros(Object a, Object b) {
     try {
         double numA = Double.parseDouble(a.toString().replaceAll("[^\\d.]", ""));
@@ -306,8 +307,8 @@ public void Matar_proceso() {
     for (int col = 0; col < modelo.getColumnCount(); col++) {
         datosFila[col] = modelo.getValueAt(filaModelo, col);
     }
-///MISHEL///////////////////
-    // 🧠 Extraer PID (columna 2)
+//////////////////////////////////MISHEL///////////////////////////////////////////
+    // Extraer PID (columna 2)
     String pid = String.valueOf(datosFila[2]);
 
     // ️ Ejecutar taskkill
@@ -721,7 +722,7 @@ public double obtenerUsoCPU() {
     }//GEN-LAST:event_No_procesosActionPerformed
 
     private void GRAFICActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GRAFICActionPerformed
-//MISHEL
+//////////////////MISHEL//////////////////////////////////////////
     JFrame ventana = new JFrame("Dashboard de Procesos");
     ventana.setSize(950, 650);
     ventana.setLocationRelativeTo(null);
@@ -1043,110 +1044,113 @@ public double obtenerUsoCPU() {
     }//GEN-LAST:event_ConfiguracionActionPerformed
 
     private void HistorialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_HistorialActionPerformed
-//KATHYA
-    JDialog historialVentana = new JDialog(this, "Historial de Aplicaciones", true);
-    historialVentana.setSize(800, 500);
-    historialVentana.setLocationRelativeTo(this);
-    historialVentana.setLayout(new BorderLayout());
+///////////////////////KATHIA///////////////////////////////////
+JDialog historialVentana = new JDialog(this, "Historial de Aplicaciones", true);
+historialVentana.setSize(800, 500);
+historialVentana.setLocationRelativeTo(this);
+historialVentana.setLayout(new BorderLayout());
 
-    JPanel panelPrincipal = new JPanel(new BorderLayout());
-    panelPrincipal.setBackground(new Color(250, 250, 250));
+JPanel panelPrincipal = new JPanel(new BorderLayout());
+panelPrincipal.setBackground(new Color(250, 250, 250));
 
-    // 📅 Fecha actual y simulada de inicio
-    String fechaInicio = "2025-09-19";
-    String fechaFin = java.time.LocalDate.now().toString();
+// Fecha actual y simulada de inicio
+String fechaInicio = "2025-09-19";
+String fechaFin = java.time.LocalDate.now().toString();
 
-    JLabel rangoFechas = new JLabel("Historial desde " + fechaInicio + " hasta " + fechaFin);
-    rangoFechas.setFont(new Font("Arial", Font.BOLD, 14));
-    rangoFechas.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+JLabel rangoFechas = new JLabel("Historial desde " + fechaInicio + " hasta " + fechaFin);
+rangoFechas.setFont(new Font("Arial", Font.BOLD, 14));
+rangoFechas.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-    DefaultTableModel historialModel = new DefaultTableModel(
-        new Object[]{"Aplicaciones", "Nombre", "CPU (%)", "Red (Mbps)"}, 0
-    ) {
-        Class[] types = new Class[]{ImageIcon.class, String.class, String.class, String.class};
-        boolean[] canEdit = new boolean[]{false, false, false, false};
+DefaultTableModel historialModel = new DefaultTableModel(
+    new Object[]{"Aplicaciones", "Nombre", "CPU (%)", "Red (Mbps)"}, 0
+) {
+    Class[] types = new Class[]{ImageIcon.class, String.class, String.class, String.class};
+    boolean[] canEdit = new boolean[]{false, false, false, false};
 
-        @Override
-        public boolean isCellEditable(int rowIndex, int columnIndex) {
-            return canEdit[columnIndex];
-        }
-
-        @Override
-        public Class<?> getColumnClass(int columnIndex) {
-            return types[columnIndex];
-        }
-    };
-
-    JTable tablaHistorial = new JTable(historialModel);
-    tablaHistorial.setRowHeight(32);
-    tablaHistorial.setFillsViewportHeight(true);
-    tablaHistorial.getTableHeader().setBackground(new Color(100, 149, 237));
-    tablaHistorial.getTableHeader().setForeground(Color.WHITE);
-    tablaHistorial.setGridColor(Color.LIGHT_GRAY);
-//MISHEL
-    // 🔁 Extraer desde jtabla_datos
-    for (int i = 0; i < jtabla_datos.getRowCount(); i++) {
-        Object icono = jtabla_datos.getValueAt(i, 0); // Aplicaciones (ImageIcon)
-        String nombre = jtabla_datos.getValueAt(i, 1).toString(); // Nombre
-        String cpu = jtabla_datos.getValueAt(i, 6).toString();    // CPU (%)
-        String red = jtabla_datos.getValueAt(i, 8).toString();    // Red (Mbps)
-
-        historialModel.addRow(new Object[]{icono, nombre, cpu, red});
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return canEdit[columnIndex];
     }
 
-    //  Renderer para íconos centrados
-    tablaHistorial.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-            boolean isSelected, boolean hasFocus, int row, int column) {
-            if (value instanceof ImageIcon) {
-                JLabel label = new JLabel((ImageIcon) value);
-                label.setHorizontalAlignment(SwingConstants.CENTER);
-                return label;
-            }
-            return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        return types[columnIndex];
+    }
+};
+
+JTable tablaHistorial = new JTable(historialModel);
+tablaHistorial.setRowHeight(32);
+tablaHistorial.setFillsViewportHeight(true);
+tablaHistorial.getTableHeader().setBackground(new Color(100, 149, 237));
+tablaHistorial.getTableHeader().setForeground(Color.WHITE);
+tablaHistorial.setGridColor(Color.LIGHT_GRAY);
+
+//////////////////////MISHEL//////////////////////////////////////////////////////
+// Extraer desde jtabla_datos con validación de columnas
+int columnas = jtabla_datos.getColumnCount();
+
+for (int i = 0; i < jtabla_datos.getRowCount(); i++) {
+    Object icono = columnas > 0 ? jtabla_datos.getValueAt(i, 0) : null;
+    String nombre = columnas > 1 ? jtabla_datos.getValueAt(i, 1).toString() : "Sin nombre";
+    String cpu = columnas > 6 ? jtabla_datos.getValueAt(i, 6).toString() : "0";
+    String red = columnas > 8 ? jtabla_datos.getValueAt(i, 8).toString() : "0";
+
+    historialModel.addRow(new Object[]{icono, nombre, cpu, red});
+}
+
+//  Renderer para íconos centrados
+tablaHistorial.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value,
+        boolean isSelected, boolean hasFocus, int row, int column) {
+        if (value instanceof ImageIcon) {
+            JLabel label = new JLabel((ImageIcon) value);
+            label.setHorizontalAlignment(SwingConstants.CENTER);
+            return label;
         }
-    });
+        return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+    }
+});
 
-    // Ordenamiento por CPU y Red
-    TableRowSorter<TableModel> sorter = new TableRowSorter<>(historialModel);
-    sorter.setComparator(2, (a, b) -> compararNumeros(a, b)); // CPU
-    sorter.setComparator(3, (a, b) -> compararNumeros(a, b)); // Red
-    tablaHistorial.setRowSorter(sorter);
+// Ordenamiento por CPU y Red
+TableRowSorter<TableModel> sorter = new TableRowSorter<>(historialModel);
+sorter.setComparator(2, (a, b) -> compararNumeros(a, b)); // CPU
+sorter.setComparator(3, (a, b) -> compararNumeros(a, b)); // Red
+tablaHistorial.setRowSorter(sorter);
 
-    JScrollPane scroll = new JScrollPane(tablaHistorial);
+JScrollPane scroll = new JScrollPane(tablaHistorial);
 
-    // Botón para borrar historial
-    JButton btnBorrar = new JButton("Borrar Historial");
-    btnBorrar.setBackground(new Color(220, 20, 60));
-    btnBorrar.setForeground(Color.WHITE);
-    btnBorrar.setFont(new Font("Arial", Font.BOLD, 14));
-    btnBorrar.addActionListener(ev -> {
-        historialModel.setRowCount(0); // Vacía la tabla
-        JOptionPane.showMessageDialog(historialVentana,
-        "Historial borrado con éxito.",
-        "Confirmación",
-        JOptionPane.INFORMATION_MESSAGE);
-    });
+// Botón para borrar historial
+JButton btnBorrar = new JButton("Borrar Historial");
+btnBorrar.setBackground(new Color(220, 20, 60));
+btnBorrar.setForeground(Color.WHITE);
+btnBorrar.setFont(new Font("Arial", Font.BOLD, 14));
+btnBorrar.addActionListener(ev -> {
+    historialModel.setRowCount(0); // Vacía la tabla
+    JOptionPane.showMessageDialog(historialVentana,
+    "Historial borrado con éxito.",
+    "Confirmación",
+    JOptionPane.INFORMATION_MESSAGE);
+});
 
-    //  Botón para cerrar
-    JButton btnCerrar = new JButton("Cerrar");
-    btnCerrar.setBackground(new Color(100, 149, 237));
-    btnCerrar.setForeground(Color.WHITE);
-    btnCerrar.setFont(new Font("Arial", Font.BOLD, 14));
-    btnCerrar.addActionListener(ev -> historialVentana.dispose());
+// Botón para cerrar
+JButton btnCerrar = new JButton("Cerrar");
+btnCerrar.setBackground(new Color(100, 149, 237));
+btnCerrar.setForeground(Color.WHITE);
+btnCerrar.setFont(new Font("Arial", Font.BOLD, 14));
+btnCerrar.addActionListener(ev -> historialVentana.dispose());
 
-    JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-    panelBotones.setBackground(new Color(250, 250, 250));
-    panelBotones.add(btnBorrar);
-    panelBotones.add(btnCerrar);
+JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+panelBotones.setBackground(new Color(250, 250, 250));
+panelBotones.add(btnBorrar);
+panelBotones.add(btnCerrar);
 
-    panelPrincipal.add(rangoFechas, BorderLayout.NORTH);
-    panelPrincipal.add(scroll, BorderLayout.CENTER);
-    panelPrincipal.add(panelBotones, BorderLayout.SOUTH);
+panelPrincipal.add(rangoFechas, BorderLayout.NORTH);
+panelPrincipal.add(scroll, BorderLayout.CENTER);
+panelPrincipal.add(panelBotones, BorderLayout.SOUTH);
 
-    historialVentana.add(panelPrincipal);
-    historialVentana.setVisible(true);
+historialVentana.add(panelPrincipal);
+historialVentana.setVisible(true);
 
     }//GEN-LAST:event_HistorialActionPerformed
 
@@ -1222,9 +1226,8 @@ public double obtenerUsoCPU() {
     }//GEN-LAST:event_VistaActionPerformed
 
     private void arranqueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arranqueActionPerformed
-//KATHIA
-        
-        JDialog arranqueVentana = new JDialog(this, "Aplicaciones de Arranque", true);
+////////////////////////////KATHIA////////////////////////////////////////
+    JDialog arranqueVentana = new JDialog(this, "Aplicaciones de Arranque", true);
     arranqueVentana.setSize(750, 450);
     arranqueVentana.setLocationRelativeTo(this);
     arranqueVentana.setLayout(new BorderLayout());
@@ -1256,7 +1259,7 @@ public double obtenerUsoCPU() {
     tablaArranque.getTableHeader().setForeground(Color.WHITE);
     tablaArranque.setGridColor(Color.LIGHT_GRAY);
 
-    //  Renderer para íconos centrados
+    // Renderer para íconos centrados
     tablaArranque.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
@@ -1269,8 +1272,8 @@ public double obtenerUsoCPU() {
             return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         }
     });
-//MISHEL
-    //  Renderer para estado con color
+
+    // Renderer para estado con color
     tablaArranque.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
@@ -1279,10 +1282,10 @@ public double obtenerUsoCPU() {
             label.setOpaque(true);
             label.setHorizontalAlignment(SwingConstants.CENTER);
             if (value.toString().equalsIgnoreCase("Habilitado")) {
-                label.setBackground(new Color(144, 238, 144)); // Verde claro
+                label.setBackground(new Color(144, 238, 144));
                 label.setForeground(Color.BLACK);
             } else if (value.toString().equalsIgnoreCase("Deshabilitado")) {
-                label.setBackground(new Color(255, 160, 122)); // Rojo claro
+                label.setBackground(new Color(255, 160, 122));
                 label.setForeground(Color.BLACK);
             } else {
                 label.setBackground(Color.WHITE);
@@ -1292,7 +1295,7 @@ public double obtenerUsoCPU() {
         }
     });
 
-    //  Ordenamiento por encabezado
+    // Ordenamiento por encabezado
     TableRowSorter<TableModel> sorter = new TableRowSorter<>(arranqueModel);
     tablaArranque.setRowSorter(sorter);
 
@@ -1314,26 +1317,25 @@ public double obtenerUsoCPU() {
         }
     });
 
-    // ?Extraer desde jtabla_datos
+    // Extraer desde jtabla_datos con validación de columnas
+    int columnas = jtabla_datos.getColumnCount();
+
     for (int i = 0; i < jtabla_datos.getRowCount(); i++) {
-        Object icono = jtabla_datos.getValueAt(i, 0); // Aplicaciones
-        String nombre = jtabla_datos.getValueAt(i, 1).toString(); // Nombre
-        String anunciante = jtabla_datos.getValueAt(i, 3).toString(); // Anunciante
-        String estado = jtabla_datos.getValueAt(i, 4).toString(); // Estado
+        Object icono = columnas > 0 ? jtabla_datos.getValueAt(i, 0) : null;
+        String nombre = columnas > 1 ? jtabla_datos.getValueAt(i, 1).toString() : "Sin nombre";
+        String anunciante = columnas > 3 ? jtabla_datos.getValueAt(i, 3).toString() : "Desconocido";
+        String estado = columnas > 4 ? jtabla_datos.getValueAt(i, 4).toString() : "Indefinido";
 
         arranqueModel.addRow(new Object[]{icono, nombre, estado, anunciante});
     }
 
     JScrollPane scroll = new JScrollPane(tablaArranque);
 
-    // Botón regresar
     JButton btnRegresar = new JButton("Regresar");
     btnRegresar.setBackground(new Color(70, 130, 180));
     btnRegresar.setForeground(Color.WHITE);
     btnRegresar.setFont(new Font("Arial", Font.BOLD, 14));
     btnRegresar.addActionListener(ev -> arranqueVentana.dispose());
-
-   
 
     JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     panelBotones.setBackground(new Color(245, 245, 245));
@@ -1344,10 +1346,12 @@ public double obtenerUsoCPU() {
 
     arranqueVentana.add(panelPrincipal);
     arranqueVentana.setVisible(true);
+
     }//GEN-LAST:event_arranqueActionPerformed
 
     private void serviciosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serviciosActionPerformed
         // TODO add your handling code here:
+ ////////////////////PABLO PALENCIA       //////
         DefaultTableModel modelo = new DefaultTableModel();
     modelo.addColumn("Nombre Imagen");
     modelo.addColumn("PID");
@@ -1385,7 +1389,7 @@ public double obtenerUsoCPU() {
     }//GEN-LAST:event_jTextFieldFiltroActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-
+/////////////KATHIA////////////////////////////
     // BOTÓN DE FILTRADO DE PROCESOS — HECHO POR KATHIA CONTRERAS
     String filtro = jTextFieldFiltro.getText().trim().toLowerCase();
 
@@ -1419,10 +1423,11 @@ public double obtenerUsoCPU() {
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jPanel1AncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jPanel1AncestorAdded
-//MISHEL
+//////////////////////////MISHEL/////////////////////////////////
+////////////////LECTURA EN CONSTANTE ACTUALIZACIÒN////////////////////
         Timer timer = new Timer(1000, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                double usoCPU = obtenerUsoCPU(); // Simulación o lectura real
+                double usoCPU = obtenerUsoCPU(); // lectura real
                 double ramUsada = Math.random() * 8;
                 double ramTotal = 8.0;
                 double discoUsado = 100 + Math.random() * 50;
@@ -1447,6 +1452,7 @@ public double obtenerUsoCPU() {
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         // TODO add your handling code here:
+   ///////////////MISHEL //////////// MANUAL DE USUARIO     
        
     try {
         File htmlFile = new File("C:\\Users\\user\\Desktop\\AYUDASMISHEL\\manual_usuario4.html");
@@ -1469,28 +1475,34 @@ getContentPane().setBackground(new Color(230, 230, 250));       // TODO add your
     }//GEN-LAST:event_formWindowOpened
 
     private void detallesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_detallesActionPerformed
-        // TODO add your handling code here:
-        DefaultTableModel modelo = new DefaultTableModel();
-    modelo.addColumn("PID");
-    modelo.addColumn("Nombre");
-    modelo.addColumn("Usuario");
+/////////////pablo/////////////////////////////
+    DefaultTableModel modelo = new DefaultTableModel(
+        new Object[]{"PID", "Nombre", "Usuario"}, 0
+    ) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false; // tabla solo lectura
+        }
+    };
 
-    ProcessHandle.allProcesses()
-        .forEach(ph -> {
-            try {
-                String nombre = ph.info().command().orElse("Desconocido");
-                String usuario = ph.info().user().orElse("Sistema");
-                modelo.addRow(new Object[]{
-                        ph.pid(),
-                        nombre,
-                        usuario
-                });
-            } catch (Exception e) {
-                // ignorar procesos a los que no se puede acceder
-            }
-        });
+    ProcessHandle.allProcesses().forEach(ph -> {
+        try {
+            long pid = ph.pid();
+            String nombre = ph.info().command().orElse("Desconocido");
+            String usuario = ph.info().user().orElse("Sistema");
+
+            modelo.addRow(new Object[]{pid, nombre, usuario});
+        } catch (Exception e) {
+            // Ignorar procesos inaccesibles
+        }
+    });
 
     jtabla_datos.setModel(modelo);
+    jtabla_datos.setRowHeight(28);
+    jtabla_datos.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+    jtabla_datos.setFont(new Font("Arial", Font.PLAIN, 13));
+
+
     }//GEN-LAST:event_detallesActionPerformed
 
     private void usuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usuarioActionPerformed
