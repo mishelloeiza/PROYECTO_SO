@@ -58,6 +58,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
@@ -1506,25 +1507,72 @@ getContentPane().setBackground(new Color(230, 230, 250));       // TODO add your
     }//GEN-LAST:event_detallesActionPerformed
 
     private void usuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usuarioActionPerformed
-        // TODO add your handling code here:
-      ////////////// ///MISHEL///////////////
-        try {
-        String usuario = System.getProperty("user.name");//muestra el nombre de usuario real de Windows
-        String sistema = System.getProperty("os.name");
-        String arquitectura = System.getProperty("os.arch");
+/////////////////////Alisson López/////////////////////////////////////////////
+    String user = System.getProperty("user.name");
+    String home = System.getProperty("user.home");
+    String os = System.getProperty("os.name");
+    String version = System.getProperty("os.version");
+    String arch = System.getProperty("os.arch");
 
-        String mensaje = "👤 Usuario actual: " + usuario +
-                         "\n🖥️ Sistema operativo: " + sistema + //muestra el nombre del sistema operativo
-                         "\n⚙️ Arquitectura: " + arquitectura;
+    // Creamos la ventana emergente tipo JDialog
+    JDialog usuarioVentana = new JDialog(this, "Información del Usuario", true);
+    usuarioVentana.setSize(500, 300);
+    usuarioVentana.setLocationRelativeTo(this);
+    usuarioVentana.setLayout(new BorderLayout());
 
-        JOptionPane.showMessageDialog(this, mensaje, "Información del Usuario", JOptionPane.INFORMATION_MESSAGE);
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "No se pudo obtener la información del usuario.", "Error", JOptionPane.ERROR_MESSAGE);
-    }
+    // Panel principal
+    JPanel panelPrincipal = new JPanel(new BorderLayout());
+    panelPrincipal.setBackground(new Color(250, 250, 250));
+    panelPrincipal.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+    // Texto con la información del usuario
+    JTextArea textArea = new JTextArea();
+    textArea.setEditable(false);
+    textArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+    textArea.setText(
+        "Usuario: " + user +
+        "\nCarpeta de usuario: " + home +
+        "\nSistema Operativo: " + os +
+        "\nVersión: " + version +
+        "\nArquitectura: " + arch
+    );
+
+    JScrollPane scrollPane = new JScrollPane(textArea);
+    panelPrincipal.add(scrollPane, BorderLayout.CENTER);
+
+    // Botón cerrar
+    JButton btnCerrar = new JButton("Cerrar");
+    btnCerrar.addActionListener(e -> usuarioVentana.dispose());
+    JPanel panelBoton = new JPanel();
+    panelBoton.add(btnCerrar);
+
+    // Agregamos al JDialog
+    usuarioVentana.add(panelPrincipal, BorderLayout.CENTER);
+    usuarioVentana.add(panelBoton, BorderLayout.SOUTH);
+
+    // Mostramos la ventana
+    usuarioVentana.setVisible(true);
     }//GEN-LAST:event_usuarioActionPerformed
 
     private void EficienciaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EficienciaActionPerformed
-        // TODO add your handling code here:
+        ///////////////////////////////////////////Alisson López/////////////////////////////////////////////////
+        int filaSeleccionada = jtabla_datos.getSelectedRow();
+
+    if (filaSeleccionada == -1) {
+        JOptionPane.showMessageDialog(this, 
+            "Por favor selecciona un proceso de la tabla.", 
+            "Aviso", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    int columnaEstado = jtabla_datos.getColumnCount() - 1;
+
+    jtabla_datos.setValueAt("Eficiencia Activada", filaSeleccionada, columnaEstado);
+
+    JOptionPane.showMessageDialog(this, 
+        "El proceso seleccionado ahora está en modo eficiencia.\n" +
+        "Se ha reducido su prioridad y mejorado el uso energético",
+        "Modo Eficiencia", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_EficienciaActionPerformed
 
     /**
