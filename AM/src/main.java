@@ -82,13 +82,14 @@ public class main extends javax.swing.JFrame {
         No_procesos.setEditable(false);
         configurarTabla();
         mostrar_procesos();
+        //Actualiza periódicamente la lista de procesos cada 3 segundos
         Timer actualizador = new Timer(3000, new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             mostrar_procesos();
         }
     });
-    actualizador.start();
+    actualizador.start(); //Inicia el timer que mantiene la tabla actualizada automáticamente
 }
 
  private void configurarTabla() {
@@ -163,9 +164,10 @@ public class main extends javax.swing.JFrame {
 
 ////////////////////////////////////////PABLO///////////////////////////////////////////////////////////////////
  private void mostrar_procesos() {
-    modelo.setRowCount(0);
+    modelo.setRowCount(0); //Limpia la tabla antes de cargar nuevos datos, evitando duplicados
 
     try {
+        //Ejecuta comando de sistema para obtener lista de procesos en formato CSV
         Process p = Runtime.getRuntime().exec(new String[]{"cmd", "/c", "tasklist /FO CSV /NH"});
         BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream(), "Cp1252"));
         String line;
@@ -192,6 +194,7 @@ public class main extends javax.swing.JFrame {
             }
         }
         input.close();
+        //Actualiza el contador de procesos con el número real de filas en la tabla
         No_procesos.setText(String.valueOf(modelo.getRowCount()));
     } catch (Exception err) {
         err.printStackTrace();
@@ -265,6 +268,7 @@ public static Map<String, Double> obtenerProcesosDesdeWindows() {
         Map<String, Double> procesos = new LinkedHashMap<>();
         try {
             Process proceso = Runtime.getRuntime().exec(new String[]{"cmd", "/c", "tasklist /FO CSV /NH"});
+            //Ejecuta comando de Windows para obtener lista de procesos en formato CSV
             BufferedReader reader = new BufferedReader(new InputStreamReader(proceso.getInputStream(), "Cp1252"));
             String linea;
             while ((linea = reader.readLine()) != null) {
@@ -272,10 +276,12 @@ public static Map<String, Double> obtenerProcesosDesdeWindows() {
                 if (partes.length >= 5) {
                     String nombre = partes[0].replace("\"", "").trim();
                     String memoriaStr = partes[4].replace("\"", "").replace("K", "").replace(",", "").trim();
+                    //Extrae y limpia el string de memoria
                     if (!memoriaStr.isEmpty()) {
                         try {
                             double memoriaKB = Double.parseDouble(memoriaStr);
                             double memoriaMB = memoriaKB / 1024;
+                            //Convierte la memoria de kilobytes a megabytes
                             if (memoriaMB > 0) {
                                 procesos.put(nombre, memoriaMB);
                             }
@@ -286,11 +292,11 @@ public static Map<String, Double> obtenerProcesosDesdeWindows() {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return procesos;
+        return procesos; //Retorna el Map con todos los procesos y su consumo de memoria
     }
 ////////////////////////////////PABLO//////////////////////////////////////////////////////////////
     void LimpiarTabla() {
-        modelo.setRowCount(0);
+        modelo.setRowCount(0); //Elimina todas las filas de la tabla, dejándola vacía
     }
 ///////////////////////////KATHIA/////////////////////////////////////////////////////////
 public void Matar_proceso() {
@@ -333,10 +339,12 @@ public void Matar_proceso() {
 private ImageIcon buscarIconoDesdeTabla(String nombreBuscado) {
     for (int i = 0; i < jtabla_datos.getRowCount(); i++) {
         Object nombreObj = jtabla_datos.getValueAt(i, 1); // Columna "Nombre"
+        //Obtiene el nombre del proceso en la columna 1
         if (nombreObj != null && nombreObj.toString().equalsIgnoreCase(nombreBuscado)) {
             Object iconoObj = jtabla_datos.getValueAt(i, 0); // Columna "Aplicaciones"
             if (iconoObj instanceof ImageIcon) {
                 return (ImageIcon) iconoObj;
+                //Retorna el ImageIcon si el objeto es del tipo correcto
             }
         }
     }
@@ -347,7 +355,7 @@ public double obtenerUsoCPU() {
     try {
         com.sun.management.OperatingSystemMXBean osBean =
             (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();
-        return osBean.getSystemCpuLoad();
+        return osBean.getSystemCpuLoad(); // Obtiene el porcentaje de uso actual del CPU del sistema
     } catch (Exception e) {
         return 0.5; // Valor por defecto si falla
     }
@@ -1047,8 +1055,10 @@ public double obtenerUsoCPU() {
     private void HistorialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_HistorialActionPerformed
 ///////////////////////KATHIA///////////////////////////////////
 JDialog historialVentana = new JDialog(this, "Historial de Aplicaciones", true);
+//Crea un diálogo modal para mostrar el historial (bloquea la ventana principal)
 historialVentana.setSize(800, 500);
 historialVentana.setLocationRelativeTo(this);
+//Centra la ventana de historial respecto a la ventana principal
 historialVentana.setLayout(new BorderLayout());
 
 JPanel panelPrincipal = new JPanel(new BorderLayout());
@@ -1061,7 +1071,7 @@ String fechaFin = java.time.LocalDate.now().toString();
 JLabel rangoFechas = new JLabel("Historial desde " + fechaInicio + " hasta " + fechaFin);
 rangoFechas.setFont(new Font("Arial", Font.BOLD, 14));
 rangoFechas.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
+//Define el modelo de tabla personalizado con columnas específicas para el historial
 DefaultTableModel historialModel = new DefaultTableModel(
     new Object[]{"Aplicaciones", "Nombre", "CPU (%)", "Red (Mbps)"}, 0
 ) {
@@ -1229,13 +1239,16 @@ historialVentana.setVisible(true);
     private void arranqueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arranqueActionPerformed
 ////////////////////////////KATHIA////////////////////////////////////////
     JDialog arranqueVentana = new JDialog(this, "Aplicaciones de Arranque", true);
+    //Crea una ventana de diálogo modal para gestionar aplicaciones de inicio del sistema
     arranqueVentana.setSize(750, 450);
     arranqueVentana.setLocationRelativeTo(this);
+    //Centra la ventana de arranque respecto a la ventana principal de la aplicación
     arranqueVentana.setLayout(new BorderLayout());
 
     JPanel panelPrincipal = new JPanel(new BorderLayout());
     panelPrincipal.setBackground(new Color(245, 245, 245));
 
+    //Define el modelo de tabla personalizado con columnas específicas para aplicaciones de arranque
     DefaultTableModel arranqueModel = new DefaultTableModel(
         new Object[]{"Aplicaciones", "Nombre", "Estado", "Anunciante"}, 0
     ) {
@@ -1360,18 +1373,21 @@ historialVentana.setVisible(true);
 
     try {
         Process proceso = Runtime.getRuntime().exec("tasklist /svc");
+        //Ejecuta el comando de Windows para obtener lista de procesos con sus servicios
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(proceso.getInputStream()));
 
         String linea;
         boolean empezar = false;
         while ((linea = reader.readLine()) != null) {
-            if (linea.contains("====")) { // separador de encabezado
+            if (linea.contains("====")) { //separador de encabezado
                 empezar = true;
                 continue;
             }
+            //Detecta el separador del encabezado para comenzar a leer los datos reales de procesos
             if (empezar && !linea.trim().isEmpty()) {
                 String nombre = linea.length() >= 25 ? linea.substring(0, 25).trim() : linea.trim();
+                //Extrae el nombre del proceso usando posiciones fijas del formato de tasklist
                 String pid = linea.length() >= 35 ? linea.substring(25, 35).trim() : "";
                 String servicios = linea.length() > 35 ? linea.substring(35).trim() : "";
                 modelo.addRow(new Object[]{nombre, pid, servicios});
@@ -1487,18 +1503,22 @@ getContentPane().setBackground(new Color(230, 230, 250));       // TODO add your
     };
 
     ProcessHandle.allProcesses().forEach(ph -> {
+        // Obtiene todos los procesos del sistema usando la API moderna de Java
         try {
             long pid = ph.pid();
             String nombre = ph.info().command().orElse("Desconocido");
+            // Extrae el nombre del ejecutable del proceso, usando "Desconocido" como valor por defecto
             String usuario = ph.info().user().orElse("Sistema");
 
             modelo.addRow(new Object[]{pid, nombre, usuario});
+            // Agrega una nueva fila al modelo con los datos del proceso (PID, nombre y usuario)
         } catch (Exception e) {
             // Ignorar procesos inaccesibles
         }
     });
 
     jtabla_datos.setModel(modelo);
+    // Asigna el modelo poblado con los datos de procesos a la tabla visual
     jtabla_datos.setRowHeight(28);
     jtabla_datos.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
     jtabla_datos.setFont(new Font("Arial", Font.PLAIN, 13));
@@ -1557,8 +1577,10 @@ getContentPane().setBackground(new Color(230, 230, 250));       // TODO add your
     private void EficienciaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EficienciaActionPerformed
         ///////////////////////////////////////////Alisson López/////////////////////////////////////////////////
         int filaSeleccionada = jtabla_datos.getSelectedRow();
+        // Verifica si el usuario ha seleccionado una fila de la tabla antes de proceder
 
     if (filaSeleccionada == -1) {
+        // Muestra advertencia si no hay selección, previniendo errores de procesamiento
         JOptionPane.showMessageDialog(this, 
             "Por favor selecciona un proceso de la tabla.", 
             "Aviso", JOptionPane.WARNING_MESSAGE);
@@ -1566,6 +1588,7 @@ getContentPane().setBackground(new Color(230, 230, 250));       // TODO add your
     }
 
     int columnaEstado = jtabla_datos.getColumnCount() - 1;
+    // Identifica la última columna de la tabla donde se mostrará el estado de eficiencia
 
     jtabla_datos.setValueAt("Eficiencia Activada", filaSeleccionada, columnaEstado);
 
@@ -1573,6 +1596,7 @@ getContentPane().setBackground(new Color(230, 230, 250));       // TODO add your
         "El proceso seleccionado ahora está en modo eficiencia.\n" +
         "Se ha reducido su prioridad y mejorado el uso energético",
         "Modo Eficiencia", JOptionPane.INFORMATION_MESSAGE);
+    // Informa al usuario sobre la acción realizada y sus beneficios
     }//GEN-LAST:event_EficienciaActionPerformed
 
     /**
