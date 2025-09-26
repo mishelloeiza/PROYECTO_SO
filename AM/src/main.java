@@ -180,7 +180,7 @@ public class main extends javax.swing.JFrame {
                 String numSesion = parts[3].replace("\"", "").trim();
                 String memoria = parts[4].replace("\"", "").trim().replace(" K", " M"); // Solo cambio visual
 
-                // Simulación de valores aleatorios
+                // valores aleatorios
                 String cpu = String.format("%.1f%%", Math.random() * 20);       // Ej: "13.9%"
                 String disco = String.format("%.1f MB/s", Math.random() * 5);   // Ej: "0.5 MB/s"
                 String red = String.format("%.1f Mbps", Math.random() * 10);    // Ej: "1.2 Mbps"
@@ -328,7 +328,7 @@ public void Matar_proceso() {
         for (int i = 0; i < datosFila.length; i++) {
             mensaje.append(modelo.getColumnName(i)).append(": ").append(datosFila[i]).append("\n");
         }
-
+// panel de confirmaciòn 
         JOptionPane.showMessageDialog(this, mensaje.toString(), "Proceso terminado", JOptionPane.INFORMATION_MESSAGE);
     } catch (IOException | InterruptedException ex) {
         JOptionPane.showMessageDialog(this, "Error al intentar finalizar el proceso con PID " + pid, "Error", JOptionPane.ERROR_MESSAGE);
@@ -736,7 +736,7 @@ public double obtenerUsoCPU() {
     ventana.setSize(950, 650);
     ventana.setLocationRelativeTo(null);
     ventana.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
+// CREACIÒN DE DASHBOARD
     JPanel panelGrafica = new JPanel() {
         Map<String, Double> procesos = obtenerProcesosDesdeWindows();
         Map<String, Integer> alturasAnimadas = new LinkedHashMap<>();
@@ -764,12 +764,12 @@ public double obtenerUsoCPU() {
             new Color(0x6B7280), new Color(0x0EA5E9), new Color(0x7C3AED),
             new Color(0xDC2626)
         };
-
+//LLMADO DE PROCESOS
         {
             for (String nombre : procesos.keySet()) {
                 alturasAnimadas.put(nombre, rand.nextInt(100));
             }
-
+//ACTUALIACION COSNTANTE
             new Timer(500, e -> {
                 double usoCPU = obtenerUsoCPU();
 
@@ -821,7 +821,7 @@ public double obtenerUsoCPU() {
                 repaint();
             }).start();
         }
-
+// METODO  UI
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -916,7 +916,7 @@ public double obtenerUsoCPU() {
                 return 0.5;
             }
         }
-
+// PROCESOS MAYORES
         private Map<String, Double> obtenerProcesosDesdeWindows() {
             Map<String, Double> datos = new LinkedHashMap<>();
             datos.put("operaApp.exe", 320.0);
@@ -957,7 +957,7 @@ public double obtenerUsoCPU() {
     dialogo.setSize(420, 180);
     dialogo.setLayout(null);
     dialogo.setLocationRelativeTo(this);
-
+// FILTRADO DE DATO EN TABLA
     JLabel lblTexto = new JLabel("Escriba el nombre del programa, carpeta, documento o recurso de Internet:");
     lblTexto.setBounds(20, 10, 380, 20);
     dialogo.add(lblTexto);
@@ -969,7 +969,7 @@ public double obtenerUsoCPU() {
     JTextField campo = new JTextField();
     campo.setBounds(70, 40, 320, 25);
     dialogo.add(campo);
-
+/// PERMISOS A SISTEMA PRINCIPAL
     JCheckBox admin = new JCheckBox("Crear esta tarea con privilegios administrativos");
     admin.setBounds(20, 70, 360, 20);
     dialogo.add(admin);
@@ -977,7 +977,7 @@ public double obtenerUsoCPU() {
     JButton ejecutar = new JButton("Aceptar");
     ejecutar.setBounds(300, 100, 90, 30);
     dialogo.add(ejecutar);
-
+//RECORRIDO OSHI
     ejecutar.addActionListener(ev -> {
         String comando = campo.getText().trim();
         if (!comando.isEmpty()) {
@@ -1009,7 +1009,7 @@ public double obtenerUsoCPU() {
     JLabel lblTema = new JLabel("Tema de la aplicación:");
     lblTema.setBounds(20, 20, 150, 20);
     config.add(lblTema);
-
+//OPCIONES DE CAMBIO DE COLOR
     String[] opcionesTema = {"Claro", "Oscuro", "Usar configuración del sistema"};
     JComboBox<String> comboTema = new JComboBox<>(opcionesTema);
     comboTema.setBounds(180, 20, 180, 25);
@@ -1454,7 +1454,7 @@ historialVentana.setVisible(true);
 
                 jPanel1.removeAll();
                 jPanel1.setLayout(new GridLayout(4, 1));
-
+// PRINCIPALES
                 jPanel1.add(new JLabel("CPU: " + String.format("%.1f%%", usoCPU * 100)));
                 jPanel1.add(new JLabel("RAM: " + String.format("%.1f", ramUsada) + " GB / " + ramTotal + " GB"));
                 jPanel1.add(new JLabel("Disco: " + String.format("%.1f", discoUsado) + " GB / " + discoTotal + " GB"));
